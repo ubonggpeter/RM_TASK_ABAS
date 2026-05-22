@@ -1,0 +1,3282 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>RemoTasks</title>
+<style>
+    :root {
+      --teal:#0b7a70;
+      --teal-dark:#087066;
+      --orange:#f6a400;
+      --ink:#0e1b2b;
+      --muted:#69707d;
+      --soft:#f6f8f8;
+      --line:#e8ebef;
+      --shadow: 0 18px 45px rgba(16, 24, 40, .08);
+      --shadow-soft: 0 8px 28px rgba(16, 24, 40, .08);
+      --page-x: clamp(14px, 5.35vw, 82px);
+      --page-w: min(1374px, calc(100vw - (var(--page-x) * 2)));
+    }
+
+    * { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+    body {
+      min-height:100vh;
+      overflow-x:hidden;
+      background:#fff;
+      color:var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      padding-top:88px;
+      padding-bottom:clamp(96px, 9vw, 120px);
+    }
+    button, input { font:inherit; }
+    a { color:inherit; text-decoration:none; }
+    svg { display:block; }
+
+    .site-header {
+      width:100%;
+      height:88px;
+      background:#fff;
+      border:1px solid #dde2e8;
+      border-left:0;
+      border-right:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      z-index:1000;
+    }
+    .header-inner {
+      width:var(--page-w);
+      height:100%;
+      display:grid;
+      grid-template-columns: 220px minmax(0, 1fr) 166px;
+      align-items:center;
+      gap:24px;
+    }
+    .logo {
+      display:inline-flex;
+      align-items:center;
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:-1.45px;
+      line-height:1;
+      white-space:nowrap;
+    }
+    .logo .job { color:var(--orange); }
+    .logo .sync { color:var(--teal); }
+    .desktop-nav {
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(26px, 3.1vw, 48px);
+      min-width:0;
+    }
+    .desktop-nav a {
+      height:100%;
+      display:flex;
+      align-items:center;
+      position:relative;
+      font-size:14px;
+      color:#2e3642;
+      font-weight:500;
+      white-space:nowrap;
+    }
+    .desktop-nav a.active { color:var(--teal); font-weight:700; }
+    .desktop-nav a.active::after {
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:17px;
+      height:2px;
+      border-radius:20px;
+      background:var(--teal);
+    }
+    .header-actions {
+      justify-self:end;
+      display:flex;
+      align-items:center;
+      gap:24px;
+    }
+    .icon-btn {
+      border:0;
+      background:transparent;
+      color:#0f1b2d;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      position:relative;
+      flex:0 0 auto;
+    }
+    .bell-btn { width:34px; height:44px; }
+    .bell-btn svg { width:30px; height:30px; stroke-width:2.3; }
+    .notice-dot {
+      position:absolute;
+      top:13px;
+      right:0;
+      width:14px;
+      height:14px;
+      border-radius:50%;
+      background:var(--orange);
+      color:#fff;
+      font-size:9px;
+      line-height:14px;
+      font-weight:800;
+      text-align:center;
+    }
+    .menu-btn {
+      width:52px;
+      height:52px;
+      border-radius:50%;
+      background:#fff;
+      border:1px solid #e5e9ee;
+      box-shadow: 0 10px 25px rgba(16,24,40,.10);
+    }
+    .site-header::after {
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:-1px;
+      height:1px;
+      background:rgba(221,226,232,.8);
+      pointer-events:none;
+    }
+    .menu-btn svg { width:26px; height:26px; stroke-width:2.4; }
+    .mobile-menu {
+      display:none;
+      position:absolute;
+      top:calc(100% + 1px);
+      left:var(--page-x);
+      right:var(--page-x);
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:22px;
+      box-shadow:0 18px 48px rgba(16,24,40,.14);
+      overflow:hidden;
+    }
+    .mobile-menu a {
+      display:flex;
+      align-items:center;
+      height:50px;
+      padding:0 20px;
+      border-bottom:1px solid #f0f2f5;
+      font-weight:650;
+      font-size:14px;
+      color:#26313f;
+    }
+    .mobile-menu a:last-child { border-bottom:0; }
+    .mobile-menu a.active { background:#f2fbf9; color:var(--teal); }
+    .site-header.open .mobile-menu { display:block; }
+
+    .page {
+      width:var(--page-w);
+      margin:0 auto;
+      padding:28px 0 34px;
+    }
+    .hero {
+      position:relative;
+      width:100%;
+      min-height:455px;
+      border-radius:22px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 80% 45%, rgba(149,228,219,.28) 0 0, rgba(149,228,219,.28) 26%, transparent 26.2%),
+        linear-gradient(110deg, #f8faf9 0%, #f5f8f8 47%, #dff6f2 100%);
+      box-shadow: inset 0 0 0 1px rgba(14,27,43,.02);
+      display:flex;
+      align-items:flex-start;
+    }
+    .hero-copy {
+      position:relative;
+      z-index:3;
+      width:52%;
+      padding-left:clamp(34px, 4.95vw, 68px);
+      padding-top:36px;
+    }
+    .pill {
+      display:inline-flex;
+      align-items:center;
+      gap:9px;
+      height:36px;
+      padding:0 16px;
+      border-radius:999px;
+      background:#e9f7f4;
+      color:var(--teal);
+      font-weight:800;
+      font-size:16px;
+      letter-spacing:-.2px;
+      box-shadow:0 8px 16px rgba(10,124,114,.04);
+      white-space:nowrap;
+    }
+    .pill svg { width:18px; height:18px; flex:0 0 auto; }
+    h1 {
+      margin-top:22px;
+      font-size:40px;
+      line-height:1.27;
+      letter-spacing:-1.8px;
+      max-width:430px;
+      font-weight:900;
+    }
+    h1 .accent { color:var(--orange); }
+    .hero-copy p {
+      margin-top:18px;
+      max-width:430px;
+      color:#616976;
+      font-size:20px;
+      line-height:1.48;
+      letter-spacing:-.25px;
+    }
+    .search-box {
+      position:absolute;
+      z-index:6;
+      left:clamp(34px, 4.95vw, 68px);
+      bottom:66px;
+      width:min(585px, calc(56% - 24px));
+      height:68px;
+      background:#fff;
+      border:1px solid #e2e6ea;
+      border-radius:999px;
+      display:grid;
+      grid-template-columns: minmax(0, 1fr) 1px minmax(0, .82fr) 58px;
+      align-items:center;
+      padding:0 10px 0 22px;
+      box-shadow:0 8px 25px rgba(16,24,40,.09);
+      min-width:430px;
+    }
+    .search-field {
+      display:flex;
+      align-items:center;
+      gap:18px;
+      color:#8b919b;
+      font-size:16px;
+      min-width:0;
+    }
+    .search-field svg { flex:0 0 auto; width:25px; height:25px; color:#0e1b2b; stroke-width:2.1; }
+    .search-field span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .divider { width:1px; height:36px; background:#e4e6ea; }
+    .search-submit {
+      width:54px;
+      height:54px;
+      border:0;
+      border-radius:50%;
+      background:linear-gradient(180deg, #168c82, #087168);
+      color:#fff;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      box-shadow:0 12px 20px rgba(9,118,108,.26);
+    }
+    .search-submit svg { width:25px; height:25px; stroke-width:2.3; }
+    .popular {
+      position:absolute;
+      z-index:6;
+      left:clamp(34px, 4.95vw, 68px);
+      bottom:29px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:14px;
+      color:#4b5563;
+      flex-wrap:wrap;
+      max-width:min(585px, 58%);
+    }
+    .tag {
+      height:29px;
+      display:inline-flex;
+      align-items:center;
+      padding:0 18px;
+      border-radius:999px;
+      background:#fff;
+      color:#202b39;
+      border:1px solid #e4e8ed;
+      box-shadow:0 7px 15px rgba(16,24,40,.07);
+      font-size:13px;
+      font-weight:650;
+      white-space:nowrap;
+    }
+    .hero-art {
+      position:absolute;
+      z-index:2;
+      right:18px;
+      bottom:0;
+      height:100%;
+      width:51.5%;
+      pointer-events:none;
+    }
+    .hero-art img {
+      position:absolute;
+      right:0;
+      bottom:0;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      object-position:right bottom;
+      filter:saturate(1.03);
+    }
+
+    .content-grid {
+      display:grid;
+      min-width:0;
+      grid-template-columns: 55.7% 1px minmax(0, 1fr);
+      gap:32px;
+      margin-top:38px;
+      align-items:start;
+    }
+    .middle-line { width:1px; min-height:265px; background:#e5e8ee; align-self:stretch; }
+    .section-head {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+    .section-head h2 {
+      font-size:20px;
+      line-height:1.1;
+      font-weight:900;
+      letter-spacing:-.55px;
+    }
+    .view-all {
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      font-weight:800;
+      color:#0f1b2d;
+      font-size:14px;
+      white-space:nowrap;
+    }
+    .view-all svg { width:18px; height:18px; stroke-width:2.3; }
+    .category-row {
+      display:grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap:14px;
+    }
+    .category-card {
+      min-height:178px;
+      border-radius:11px;
+      background:#fff;
+      border:1px solid #ebedf1;
+      box-shadow:var(--shadow-soft);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:18px 12px;
+      min-width:0;
+    }
+    .category-card.active {
+      background:linear-gradient(145deg, #178e82, #087368);
+      color:#fff;
+      border:0;
+      box-shadow:0 18px 35px rgba(8,113,104,.23);
+    }
+    .cat-icon {
+      width:58px;
+      height:58px;
+      border-radius:50%;
+      background:#fff1dd;
+      display:grid;
+      place-items:center;
+      margin-bottom:18px;
+      color:#0e1b2b;
+      flex:0 0 auto;
+    }
+    .category-card.active .cat-icon { background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.18); }
+    .cat-icon svg { width:32px; height:32px; stroke-width:1.9; }
+    .category-card h3 { font-size:16px; font-weight:900; letter-spacing:-.25px; margin-bottom:14px; }
+    .category-card p { font-size:14px; color:#5f6875; }
+    .category-card.active p { color:rgba(255,255,255,.82); }
+
+    .categories, .recommended { min-width:0; }
+    .jobs-list { display:grid; gap:12px; }
+    .job-card {
+      min-height:115px;
+      display:grid;
+      grid-template-columns:72px minmax(0,1fr) auto 28px;
+      gap:14px;
+      align-items:center;
+      border:1px solid #e9edf2;
+      border-radius:11px;
+      background:#fff;
+      padding:14px 15px;
+      box-shadow:0 9px 25px rgba(16,24,40,.045);
+      min-width:0;
+    }
+    .brand-icon {
+      width:60px;
+      height:60px;
+      display:grid;
+      place-items:center;
+      border-radius:14px;
+      background:#fff;
+      border:1px solid #eff2f5;
+      box-shadow:0 8px 18px rgba(16,24,40,.04);
+      overflow:hidden;
+    }
+    .brand-icon.google svg { width:42px; height:42px; }
+    .brand-icon.slack svg { width:38px; height:38px; }
+    .job-info { min-width:0; }
+    .job-info h3 { font-size:16px; font-weight:900; letter-spacing:-.25px; margin-bottom:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .job-info .meta { font-size:14px; color:#6f7783; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .labels { margin-top:13px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .label {
+      height:26px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 13px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+    }
+    .label.green { background:#e9f8f5; color:var(--teal); }
+    .label.orange { background:#fff4e4; color:#e19100; }
+    .label.purple { background:#f0edff; color:#6a57c7; }
+    .salary { align-self:start; padding-top:7px; font-weight:900; color:var(--teal); font-size:13px; white-space:nowrap; }
+    .save-wrap { height:100%; display:flex; flex-direction:column; align-items:end; justify-content:space-between; color:#0e1b2b; }
+    .save-wrap svg { width:25px; height:25px; stroke-width:1.9; flex:0 0 auto; }
+    .time { font-size:13px; color:#8b929d; white-space:nowrap; }
+
+    .bottom-nav-wrap {
+      position:fixed;
+      left:50%;
+      bottom:58px;
+      transform:translateX(-50%);
+      width:var(--page-w);
+      z-index:25;
+    }
+    .bottom-nav {
+      width:100%;
+      height:61px;
+      background:#fff;
+      border:1px solid #e6e9ee;
+      box-shadow:0 11px 30px rgba(16,24,40,.08);
+      border-radius:8px;
+      display:grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items:center;
+    }
+    .bottom-nav a {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      color:#6e7580;
+      font-size:13px;
+      font-weight:650;
+      height:100%;
+      min-width:0;
+    }
+    .bottom-nav svg { width:24px; height:24px; stroke-width:1.9; flex:0 0 auto; }
+    .bottom-nav span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .bottom-nav a.active { color:var(--teal); font-weight:900; }
+    .bottom-nav a.active svg { fill:var(--teal); stroke:var(--teal); }
+
+    @media (max-width: 1220px) {
+      :root { --page-x: clamp(22px, 4vw, 52px); }
+      .header-inner { grid-template-columns:180px minmax(0,1fr) 136px; }
+      .desktop-nav { gap:clamp(18px, 2.4vw, 34px); }
+      .hero { min-height:420px; }
+      .hero-copy { width:54%; }
+      h1 { font-size:clamp(34px, 3.3vw, 40px); }
+      .hero-copy p { font-size:clamp(17px, 1.65vw, 20px); }
+      .search-box { width:min(560px, calc(58% - 18px)); min-width:380px; }
+      .content-grid { grid-template-columns:1fr; gap:34px; }
+      .middle-line { display:none; }
+      .category-row { grid-template-columns: repeat(5, minmax(130px, 1fr)); overflow-x:auto; padding-bottom:8px; scrollbar-width:none; }
+      .category-row::-webkit-scrollbar { display:none; }
+    }
+
+    @media (max-width: 980px) {
+      :root { --page-x: clamp(24px, 5.5vw, 42px); }
+      body { padding-top:clamp(90px, 14.5vw, 124px); padding-bottom:clamp(108px, 16vw, 165px); }
+      .site-header { height:clamp(90px, 14.5vw, 124px); border:0; align-items:flex-start; }
+      .header-inner {
+        width:100%;
+        grid-template-columns:auto 1fr auto;
+        gap:14px;
+        padding:clamp(24px, 4.1vw, 34px) var(--page-x) 0;
+        align-items:start;
+      }
+      .logo { font-size:clamp(27px, 4vw, 31px); letter-spacing:-1.3px; margin-top:1px; }
+      .desktop-nav { display:none; }
+      .header-actions { gap:clamp(14px, 2.7vw, 20px); }
+      .bell-btn { width:36px; height:44px; }
+      .bell-btn svg { width:clamp(27px, 4vw, 31px); height:clamp(27px, 4vw, 31px); }
+      .notice-dot { top:0; right:0; width:14px; height:14px; font-size:8px; line-height:14px; }
+      .menu-btn { width:clamp(52px, 7.2vw, 62px); height:clamp(52px, 7.2vw, 62px); box-shadow:0 12px 28px rgba(16,24,40,.12); }
+      .menu-btn svg { width:clamp(24px, 3.4vw, 29px); height:clamp(24px, 3.4vw, 29px); }
+      .page { padding:clamp(10px, 2.4vw, 20px) var(--page-x) 26px; width:100%; }
+      .hero {
+        min-height:clamp(315px, 69.5vw, 598px);
+        border-radius:clamp(17px, 2.6vw, 22px);
+        background:
+          radial-gradient(circle at 82% 30%, rgba(143,226,217,.28) 0 0, rgba(143,226,217,.28) 30%, transparent 30.2%),
+          linear-gradient(110deg, #f8faf9 0%, #f5f8f8 45%, #dff6f2 100%);
+      }
+      .hero-copy { width:66%; padding:clamp(28px, 7.4vw, 64px) 0 0 clamp(16px, 4.4vw, 38px); }
+      .pill { height:clamp(25px, 4.45vw, 38px); padding:0 clamp(9px, 1.86vw, 16px); font-size:clamp(11px, 1.98vw, 17px); gap:clamp(6px, 1vw, 9px); }
+      .pill svg { width:clamp(13px, 2.2vw, 19px); height:clamp(13px, 2.2vw, 19px); }
+      h1 { margin-top:clamp(18px, 3.95vw, 34px); font-size:clamp(21px, 5.25vw, 45px); line-height:1.30; letter-spacing:clamp(-2.1px, -0.24vw, -.7px); max-width:61vw; }
+      .hero-copy p { margin-top:clamp(15px, 3.37vw, 29px); font-size:clamp(13px, 2.68vw, 23px); line-height:1.44; max-width:min(410px, 52vw); }
+      .hero-art { right:clamp(-7px, -.45vw, -4px); width:57%; height:68%; top:clamp(10px, 2.55vw, 22px); bottom:auto; }
+      .hero-art img { object-fit:contain; object-position:right bottom; }
+      .search-box {
+        left:clamp(14px, 3.95vw, 34px);
+        right:clamp(96px, 25.8vw, 222px);
+        bottom:clamp(42px, 10vw, 86px);
+        width:auto;
+        min-width:0;
+        height:clamp(48px, 10.6vw, 91px);
+        grid-template-columns: minmax(0, 1fr) 1px minmax(0, .74fr) clamp(40px, 8.72vw, 75px);
+        padding:0 clamp(5px, 1vw, 9px) 0 clamp(14px, 3.25vw, 28px);
+        box-shadow:0 12px 30px rgba(16,24,40,.10);
+      }
+      .search-field { gap:clamp(10px, 2.1vw, 18px); font-size:clamp(12px, 2vw, 17px); }
+      .search-field svg { width:clamp(18px, 3.25vw, 28px); height:clamp(18px, 3.25vw, 28px); }
+      .divider { height:clamp(30px, 5.8vw, 50px); }
+      .search-submit { width:clamp(39px, 8.37vw, 72px); height:clamp(39px, 8.37vw, 72px); }
+      .search-submit svg { width:clamp(18px, 3.37vw, 29px); height:clamp(18px, 3.37vw, 29px); }
+      .popular { left:clamp(15px, 4.3vw, 37px); bottom:clamp(13px, 3.72vw, 32px); gap:clamp(6px, 1.4vw, 12px); font-size:clamp(11px, 1.86vw, 16px); max-width:calc(100% - clamp(28px, 8vw, 70px)); }
+      .tag { height:clamp(24px, 4.06vw, 35px); padding:0 clamp(10px, 2.1vw, 18px); font-size:clamp(10.5px, 1.74vw, 15px); }
+      .content-grid { margin-top:clamp(38px, 8.6vw, 74px); gap:clamp(40px, 6.8vw, 59px); }
+      .section-head { margin-bottom:clamp(20px, 3.95vw, 34px); }
+      .section-head h2 { font-size:clamp(20px, 3.37vw, 29px); letter-spacing:-.85px; }
+      .view-all { font-size:clamp(13px, 2.33vw, 20px); gap:clamp(7px, 1.4vw, 12px); }
+      .view-all svg { width:clamp(17px, 2.9vw, 25px); height:clamp(17px, 2.9vw, 25px); }
+      .category-row {
+        display:flex;
+        gap:clamp(12px, 2.45vw, 21px);
+        overflow-x:auto;
+        padding:0 0 8px clamp(3px, .9vw, 8px);
+        margin-left:calc(clamp(3px, .9vw, 8px) * -1);
+        margin-right:calc(var(--page-x) * -1);
+        scroll-snap-type:x proximity;
+        overscroll-behavior-x:contain;
+      }
+      .category-card {
+        flex:0 0 clamp(90px, 21.4vw, 184px);
+        width:clamp(90px, 21.4vw, 184px);
+        min-height:clamp(118px, 28.3vw, 243px);
+        border-radius:clamp(12px, 1.86vw, 16px);
+        scroll-snap-align:start;
+        padding:clamp(12px, 2.1vw, 18px) 8px;
+      }
+      .cat-icon { width:clamp(39px, 7.9vw, 68px); height:clamp(39px, 7.9vw, 68px); margin-bottom:clamp(14px, 3.25vw, 28px); }
+      .cat-icon svg { width:clamp(23px, 4.65vw, 40px); height:clamp(23px, 4.65vw, 40px); }
+      .category-card h3 { font-size:clamp(13px, 2.55vw, 22px); margin-bottom:clamp(8px, 2.1vw, 18px); }
+      .category-card p { font-size:clamp(11px, 1.98vw, 17px); }
+      .jobs-list { gap:clamp(13px, 2.33vw, 20px); }
+      .job-card {
+        min-height:clamp(105px, 20.5vw, 176px);
+        border-radius:clamp(18px, 3vw, 26px);
+        padding:clamp(14px, 2.8vw, 24px) clamp(14px, 3.1vw, 27px) clamp(14px, 2.55vw, 22px);
+        grid-template-columns:clamp(56px, 10.7vw, 92px) minmax(0,1fr) auto clamp(24px, 4.1vw, 35px);
+        gap:clamp(10px, 2.1vw, 18px);
+      }
+      .brand-icon { width:clamp(46px, 8.14vw, 70px); height:clamp(46px, 8.14vw, 70px); border-radius:clamp(12px, 1.98vw, 17px); }
+      .brand-icon.google svg { width:clamp(34px, 6.05vw, 52px); height:clamp(34px, 6.05vw, 52px); }
+      .brand-icon.slack svg { width:clamp(32px, 5.58vw, 48px); height:clamp(32px, 5.58vw, 48px); }
+      .job-info h3 { font-size:clamp(14px, 2.68vw, 23px); margin-bottom:clamp(7px, 1.4vw, 12px); }
+      .job-info .meta { font-size:clamp(12px, 2.33vw, 20px); gap:clamp(5px, 1vw, 9px); }
+      .labels { margin-top:clamp(10px, 2.45vw, 21px); gap:clamp(7px, 1.62vw, 14px); }
+      .label { height:clamp(22px, 4.4vw, 38px); padding:0 clamp(10px, 2.1vw, 18px); font-size:clamp(10px, 1.86vw, 16px); }
+      .salary { font-size:clamp(12px, 2.2vw, 19px); padding-top:5px; }
+      .save-wrap svg { width:clamp(21px, 3.84vw, 33px); height:clamp(21px, 3.84vw, 33px); }
+      .time { font-size:clamp(11px, 2.1vw, 18px); }
+      .bottom-nav-wrap { width:calc(100% - (var(--page-x) * 2)); bottom:clamp(18px, 4vw, 34px); }
+      .bottom-nav { height:clamp(74px, 10vw, 100px); border-radius:clamp(28px, 4vw, 42px); }
+      .bottom-nav a { flex-direction:column; gap:clamp(6px, 1.2vw, 10px); font-size:clamp(12px, 1.7vw, 16px); }
+      .bottom-nav svg { width:clamp(26px, 4vw, 36px); height:clamp(26px, 4vw, 36px); }
+    }
+
+    @media (max-width: 560px) {
+      :root { --page-x: clamp(14px, 4vw, 23px); }
+      body { padding-top:72px; }
+      .site-header { height:72px; }
+      .header-inner { padding-top:17px; }
+      .page { padding-top:0; }
+      .hero { min-height:300px; }
+      .hero-copy { width:65%; }
+      .hero-art { width:55.5%; height:74%; }
+      .search-box { right:clamp(88px, 22.4vw, 105px); }
+      .popular { max-width:calc(100% - 28px); }
+    }
+
+    @media (max-width: 420px) {
+      .search-box {
+        right:84px;
+        grid-template-columns:minmax(0, 1.1fr) 1px minmax(0, .6fr) 39px;
+      }
+      .search-field { gap:8px; }
+      .search-field:nth-of-type(2) span { max-width:64px; }
+      .popular { gap:5px; }
+      .tag { padding:0 8px; }
+      .category-card { flex-basis:86px; }
+      .job-card { grid-template-columns:50px minmax(0,1fr) auto 22px; gap:8px; }
+      .salary { font-size:11px; }
+      .time { font-size:10.5px; }
+    }
+
+    @media (max-width: 350px) {
+      .logo { font-size:24px; }
+      .menu-btn { width:46px; height:46px; }
+      .hero { min-height:302px; }
+      h1 { font-size:19px; }
+      .hero-copy p { font-size:11.5px; max-width:180px; }
+      .search-box { right:74px; left:12px; }
+      .search-field:nth-of-type(2) span { max-width:48px; }
+      .job-card { grid-template-columns:46px minmax(0,1fr) auto 20px; }
+      .brand-icon { width:42px; height:42px; }
+      .labels { gap:5px; }
+      .label { padding:0 8px; }
+      .bottom-nav a { font-size:11px; }
+    }
+
+
+    /* Desktop layout restored to match the supplied desktop reference */
+    @media (min-width: 981px) {
+      body { padding-top:88px; }
+      .site-header { height:88px; }
+      .header-inner { grid-template-columns: 220px minmax(0, 1fr) 166px; gap:24px; }
+      .logo { font-size:28px; letter-spacing:-1.45px; }
+      .desktop-nav { gap:clamp(26px, 3.1vw, 48px); }
+      .desktop-nav a { font-size:14px; }
+      .desktop-nav a.active::after { bottom:17px; height:2px; }
+      .header-actions { gap:24px; }
+      .bell-btn { width:34px; height:44px; }
+      .bell-btn svg { width:30px; height:30px; stroke-width:2.3; }
+      .notice-dot { top:13px; right:0; width:14px; height:14px; line-height:14px; font-size:9px; }
+      .menu-btn { width:52px; height:52px; box-shadow:0 10px 25px rgba(16,24,40,.10); }
+      .menu-btn svg { width:26px; height:26px; stroke-width:2.4; }
+    }
+
+    @media (max-width: 980px) {
+      body { padding-top:clamp(54px, 8.7vw, 74px); }
+      .site-header { height:clamp(54px, 8.7vw, 74px); }
+      .header-inner {
+        padding:clamp(11px, 2.4vw, 20px) var(--page-x) 0;
+        gap:12px;
+        align-items:start;
+      }
+      .logo { font-size:clamp(23px, 3.25vw, 29px); letter-spacing:-1.15px; margin-top:0; }
+      .header-actions { gap:clamp(10px, 2vw, 16px); }
+      .bell-btn { width:clamp(28px, 4.9vw, 36px); height:clamp(34px, 5.8vw, 44px); }
+      .bell-btn svg { width:clamp(23px, 3.7vw, 30px); height:clamp(23px, 3.7vw, 30px); }
+      .notice-dot { top:0; right:0; width:clamp(11px, 1.8vw, 14px); height:clamp(11px, 1.8vw, 14px); line-height:clamp(11px, 1.8vw, 14px); font-size:clamp(7px, 1.1vw, 8px); }
+      .menu-btn { width:clamp(38px, 5.9vw, 50px); height:clamp(38px, 5.9vw, 50px); box-shadow:0 10px 22px rgba(16,24,40,.10); }
+      .menu-btn svg { width:clamp(20px, 3vw, 25px); height:clamp(20px, 3vw, 25px); }
+      .mobile-menu { top:calc(100% + 4px); }
+    }
+
+    @media (max-width: 560px) {
+      body { padding-top:43px; }
+      .site-header { height:43px; }
+      .header-inner { padding-top:8px; }
+      .logo { font-size:22px; letter-spacing:-1px; }
+      .bell-btn { width:27px; height:31px; }
+      .bell-btn svg { width:22px; height:22px; }
+      .notice-dot { width:11px; height:11px; line-height:11px; font-size:7px; }
+      .menu-btn { width:34px; height:34px; }
+      .menu-btn svg { width:19px; height:19px; }
+    }
+
+    @media (max-width: 350px) {
+      .logo { font-size:20px; }
+      .menu-btn { width:32px; height:32px; }
+      .bell-btn svg { width:20px; height:20px; }
+    }
+
+
+    /* Interactive category jobs update */
+    .category-card {
+      cursor:pointer;
+      user-select:none;
+      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+    .category-card:hover { transform:translateY(-3px); }
+    .category-card:focus-visible {
+      outline:3px solid rgba(11,122,112,.25);
+      outline-offset:4px;
+    }
+    .brand-letter {
+      width:42px;
+      height:42px;
+      border-radius:12px;
+      display:grid;
+      place-items:center;
+      color:#fff;
+      font-weight:900;
+      font-size:20px;
+      letter-spacing:-.8px;
+      background:linear-gradient(145deg, #168c82, #f6a400);
+    }
+    .job-card { animation:jobFade .22s ease both; }
+    @keyframes jobFade { from { opacity:.25; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Recommended jobs: view-all state + real SVG brand icons */
+    .recommended .view-all {
+      border:0;
+      background:transparent;
+      cursor:pointer;
+      padding:0;
+    }
+    .brand-icon svg {
+      width:42px;
+      height:42px;
+      display:block;
+    }
+    .brand-icon.brand-round svg { border-radius:50%; }
+    .jobs-list.expanded { gap:14px; }
+    @media (max-width: 560px) {
+      .brand-icon svg { width:clamp(32px, 6.05vw, 52px); height:clamp(32px, 6.05vw, 52px); }
+    }
+
+
+
+/* RemoTasks registration and payment flow, styled to match RemoTasks */
+.jobsync-flow-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(14px, 3vw, 28px);
+  background: rgba(11, 122, 112, .16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.jobsync-flow-modal.is-open { display: flex; }
+.jobsync-flow-card {
+  width: min(100%, 460px);
+  max-height: min(92vh, 760px);
+  overflow: auto;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbfa 100%);
+  border: 1px solid rgba(11, 122, 112, .12);
+  border-radius: 26px;
+  box-shadow: 0 30px 80px rgba(14,27,43,.18);
+  color: var(--ink);
+}
+.jobsync-flow-card.wide { width: min(100%, 780px); }
+.jobsync-flow-head {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:22px 22px 16px;
+  border-bottom:1px solid rgba(11,122,112,.10);
+}
+.jobsync-flow-head h3 { font-size:clamp(20px, 2vw, 26px); line-height:1.12; letter-spacing:-.7px; font-weight:900; color:var(--ink); }
+.jobsync-flow-head p { margin-top:6px; color:#637083; font-size:14px; line-height:1.45; }
+.jobsync-modal-close {
+  border:0;
+  width:36px;
+  height:36px;
+  border-radius:14px;
+  background:#eef8f6;
+  color:var(--teal);
+  cursor:pointer;
+  font-size:22px;
+  line-height:1;
+  font-weight:800;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+}
+.jobsync-flow-body { padding:20px 22px 24px; }
+.jobsync-flow-form { display:grid; gap:14px; }
+.jobsync-flow-field { display:grid; gap:7px; }
+.jobsync-flow-field label { font-size:13px; font-weight:800; color:#1b2a3a; }
+.jobsync-flow-field input {
+  width:100%;
+  height:52px;
+  border-radius:16px;
+  border:1px solid rgba(11,122,112,.16);
+  background:#fff;
+  color:var(--ink);
+  outline:none;
+  padding:0 16px;
+  font-size:15px;
+  box-shadow:0 8px 22px rgba(16,24,40,.04);
+}
+.jobsync-flow-field input:focus { border-color:rgba(11,122,112,.55); box-shadow:0 0 0 4px rgba(11,122,112,.09); }
+.jobsync-primary-btn, .jobsync-secondary-btn {
+  border:0;
+  min-height:48px;
+  border-radius:16px;
+  padding:0 18px;
+  cursor:pointer;
+  font-weight:900;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  text-align:center;
+}
+.jobsync-primary-btn { background:linear-gradient(135deg, var(--orange), #ffc038); color:#073f3a; box-shadow:0 15px 28px rgba(246,164,0,.25); }
+.jobsync-secondary-btn { background:#eef8f6; color:var(--teal); border:1px solid rgba(11,122,112,.10); }
+.jobsync-muted-note { font-size:12px; line-height:1.5; color:#6b7480; text-align:center; margin-top:12px; }
+.jobsync-plan-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px; }
+.jobsync-plan-card {
+  border:1px solid rgba(11,122,112,.12);
+  border-radius:22px;
+  padding:18px;
+  text-align:left;
+  background:#fff;
+  box-shadow:0 14px 32px rgba(16,24,40,.07);
+  cursor:pointer;
+  color:var(--ink);
+}
+.jobsync-plan-card:hover { transform:translateY(-2px); box-shadow:0 22px 45px rgba(16,24,40,.10); }
+.jobsync-plan-kicker { color:var(--teal); font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:.7px; }
+.jobsync-plan-title { margin-top:7px; font-size:22px; line-height:1.1; font-weight:900; letter-spacing:-.6px; }
+.jobsync-price { margin-top:14px; color:var(--teal); font-size:26px; font-weight:900; }
+.jobsync-price s { color:#8b95a1; font-size:15px; margin-right:6px; }
+.jobsync-naira-equivalent {
+  margin-top:5px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:28px;
+  padding:4px 11px;
+  border-radius:999px;
+  background:#eefaf7;
+  color:var(--teal);
+  border:1px solid rgba(10,124,114,.12);
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:-.15px;
+}
+.jobsync-naira-equivalent small {
+  color:#60707e;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0;
+}
+.jobsync-chip { display:inline-flex; align-items:center; justify-content:center; min-height:26px; padding:0 11px; border-radius:999px; background:#fff4de; color:#9b6500; font-size:11px; font-weight:900; margin-top:10px; }
+.jobsync-plan-list { margin:16px 0 0; padding-left:18px; color:#60707e; line-height:1.75; font-size:14px; }
+.jobsync-method-list { display:grid; gap:12px; }
+.jobsync-method-btn {
+  width:100%;
+  border:1px solid rgba(11,122,112,.12);
+  background:#fff;
+  border-radius:18px;
+  min-height:72px;
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  cursor:pointer;
+  text-align:left;
+  box-shadow:0 12px 28px rgba(16,24,40,.055);
+}
+.jobsync-method-btn:hover { background:#fbfefc; }
+.jobsync-method-left { display:flex; align-items:center; gap:12px; min-width:0; }
+.jobsync-method-icon { width:42px; height:42px; border-radius:50%; display:grid; place-items:center; background:#e9f7f4; color:var(--teal); flex:0 0 auto; }
+.jobsync-method-icon.orange { background:#fff1d9; color:#8f5f00; }
+.jobsync-method-icon.blue { background:#e2fbff; color:#007787; }
+.jobsync-method-icon.green { background:#e8f9ee; color:#0a7433; }
+.jobsync-method-title { font-weight:900; font-size:15px; color:var(--ink); }
+.jobsync-method-sub { margin-top:3px; color:#687483; font-size:12px; }
+.jobsync-use { color:var(--teal); font-size:12px; font-weight:900; white-space:nowrap; }
+.jobsync-payment-detail { display:grid; gap:10px; }
+.jobsync-detail-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:13px;
+  background:#fff;
+  border:1px solid rgba(11,122,112,.10);
+  border-radius:17px;
+}
+.jobsync-detail-label { color:#697483; font-size:12px; font-weight:700; }
+.jobsync-detail-value { margin-top:3px; color:var(--ink); font-weight:900; word-break:break-word; }
+.jobsync-copy-btn { border:0; background:#eef8f6; color:var(--teal); border-radius:12px; padding:9px 12px; font-size:12px; font-weight:900; cursor:pointer; flex:0 0 auto; }
+.jobsync-paystack-wrap { display:none; gap:10px; }
+.jobsync-paystack-wrap.is-visible { display:grid; }
+.jobsync-paystack-framebox { height:min(58vh, 520px); border-radius:20px; overflow:hidden; border:1px solid rgba(11,122,112,.14); background:#fff; }
+#jobsyncPaystackFrame { width:100%; height:100%; border:0; display:block; background:#fff; }
+.jobsync-paystack-help { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; background:#fff8e8; border:1px solid rgba(246,164,0,.22); border-radius:17px; color:#5e4b19; font-size:13px; line-height:1.35; }
+.jobsync-paystack-help a { color:var(--teal); font-weight:900; white-space:nowrap; }
+.jobsync-actions-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+.jobsync-actions-row > * { flex:1; }
+.jobsync-countdown { color:#d18a00; font-size:12px; font-weight:900; margin-top:4px; }
+.jobsync-success-icon { width:66px; height:66px; margin:0 auto 14px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(135deg,var(--orange),#ffd15a); color:#073f3a; box-shadow:0 16px 28px rgba(246,164,0,.28); }
+@media (max-width: 720px) {
+  .jobsync-plan-grid { grid-template-columns:1fr; }
+  .jobsync-flow-card.wide { width:min(100%, 470px); }
+  .jobsync-flow-head, .jobsync-flow-body { padding-left:18px; padding-right:18px; }
+  .jobsync-paystack-framebox { height:52vh; height:52svh; }
+}
+@media (max-width: 430px) {
+  .jobsync-flow-modal { padding:10px; }
+  .jobsync-flow-card { border-radius:22px; }
+  .jobsync-method-btn { min-height:68px; }
+  .jobsync-actions-row { flex-direction:column; }
+}
+
+
+
+    /* Registered dashboard view: shown after user submits the RemoTasks form */
+    .registered-dashboard {
+      display:none;
+      width:100%;
+      margin:0 auto 38px;
+      animation: registeredFade .34s ease both;
+    }
+    @keyframes registeredFade { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+    body.jobsync-registered .hero { display:none; }
+    body.jobsync-registered .registered-dashboard { display:block; }
+    body.jobsync-registered .logo .job { color:var(--teal); }
+    body.jobsync-registered .logo .sync { color:var(--orange); }
+
+    .registered-top-row {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:22px;
+      margin:0 0 28px;
+    }
+    .registered-profile {
+      display:flex;
+      align-items:center;
+      gap:18px;
+      min-width:0;
+    }
+    .registered-avatar {
+      width:74px;
+      height:74px;
+      border-radius:50%;
+      flex:0 0 auto;
+      display:grid;
+      place-items:center;
+      color:#fff;
+      font-weight:900;
+      font-size:28px;
+      letter-spacing:-.8px;
+      background:linear-gradient(145deg,#159283,#06695f);
+      box-shadow:0 14px 30px rgba(8,113,104,.22), inset 0 0 0 1px rgba(255,255,255,.18);
+    }
+    .registered-name-wrap { min-width:0; }
+    .registered-name-wrap h2 {
+      margin:0;
+      color:#0e1b2b;
+      font-size:clamp(24px, 2.5vw, 34px);
+      line-height:1.08;
+      font-weight:900;
+      letter-spacing:-1.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:min(470px, 46vw);
+    }
+    .registered-name-wrap p {
+      margin:8px 0 0;
+      color:#51606f;
+      font-size:clamp(16px, 1.55vw, 22px);
+      font-weight:600;
+      letter-spacing:-.4px;
+    }
+    .registered-actions {
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:18px;
+      flex:0 0 auto;
+    }
+    .registered-hours {
+      border:1px solid #e6edf0;
+      background:#fff;
+      color:#0e1b2b;
+      min-height:70px;
+      border-radius:18px;
+      padding:0 18px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+      box-shadow:0 9px 24px rgba(16,24,40,.06);
+      white-space:nowrap;
+    }
+    .registered-hours .clock {
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      color:var(--teal);
+      border:3px solid rgba(9,126,114,.16);
+    }
+    .registered-hours .clock svg { width:21px; height:21px; }
+    .registered-hours span { display:block; font-weight:800; line-height:1.08; font-size:20px; letter-spacing:-.45px; }
+    .registered-hours strong {
+      width:52px;
+      height:52px;
+      display:grid;
+      place-items:center;
+      border-radius:50%;
+      color:#fff;
+      background:linear-gradient(145deg,#159283,#06695f);
+      font-size:20px;
+      font-weight:900;
+      box-shadow:0 11px 20px rgba(8,113,104,.20);
+    }
+    .registered-list-btn {
+      width:70px;
+      height:70px;
+      border-radius:17px;
+      background:#fff;
+      border:1px solid #e6edf0;
+      box-shadow:0 10px 25px rgba(16,24,40,.08);
+      display:grid;
+      place-items:center;
+      color:var(--teal);
+      cursor:pointer;
+    }
+    .registered-list-btn svg { width:34px; height:34px; stroke-width:2; }
+
+    .registered-earn-card {
+      position:relative;
+      overflow:visible;
+      min-height:318px;
+      border-radius:22px;
+      background:
+        radial-gradient(circle at 82% 42%, rgba(255,255,255,.08) 0 0, rgba(255,255,255,.08) 34%, transparent 34.2%),
+        linear-gradient(135deg,#087267 0%,#035e56 56%,#087a70 100%);
+      box-shadow:0 18px 45px rgba(8,113,104,.18);
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) minmax(300px, 43%);
+      gap:22px;
+      padding:clamp(34px, 4vw, 52px);
+      color:#fff;
+    }
+    .registered-earn-card::after {
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      pointer-events:none;
+      background:radial-gradient(700px 250px at 70% 35%, rgba(255,255,255,.12), transparent 60%),
+                 radial-gradient(520px 200px at 105% 110%, rgba(16,144,132,.35), transparent 70%);
+      opacity:.8;
+    }
+    .earn-copy, .earn-art { position:relative; z-index:2; }
+    .earn-kicker {
+      display:flex;
+      align-items:center;
+      gap:18px;
+      color:rgba(255,255,255,.96);
+      font-size:clamp(20px, 2vw, 28px);
+      font-weight:700;
+      letter-spacing:-.4px;
+    }
+    .earn-kicker svg { width:34px; height:34px; stroke-width:1.8; }
+    .earn-amount {
+      margin-top:48px;
+      font-size:clamp(44px, 5.3vw, 72px);
+      line-height:.95;
+      letter-spacing:-3px;
+      font-weight:900;
+      color:#fff;
+      text-shadow:0 12px 30px rgba(0,0,0,.18);
+    }
+    .working-btn {
+      margin-top:54px;
+      width:min(420px, 100%);
+      height:78px;
+      border-radius:18px;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.34);
+      background:rgba(255,255,255,.06);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 30px;
+      font-size:clamp(18px, 2vw, 27px);
+      font-weight:850;
+      letter-spacing:-.45px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+    .working-btn svg { width:26px; height:26px; }
+    .earn-art {
+      min-height:100%;
+      position:relative;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+    }
+    .earn-person {
+      position:absolute;
+      right:9%;
+      bottom:-52px;
+      height:390px;
+      max-height:122%;
+      width:auto;
+      object-fit:contain;
+      filter:saturate(1.02) drop-shadow(0 14px 20px rgba(0,0,0,.18));
+      pointer-events:none;
+    }
+    .earn-float {
+      position:absolute;
+      z-index:3;
+      width:68px;
+      height:68px;
+      border-radius:50%;
+      background:#fff;
+      box-shadow:0 15px 28px rgba(16,24,40,.13);
+      display:grid;
+      place-items:center;
+    }
+    .earn-float svg { width:34px; height:34px; }
+    .earn-float.figma { left:5%; top:7%; }
+    .earn-float.drive { right:6%; top:20%; }
+    .earn-brief {
+      position:absolute;
+      right:-20px;
+      bottom:-53px;
+      z-index:4;
+      width:102px;
+      height:102px;
+      border-radius:50%;
+      background:#fff;
+      border:1px solid #e9f0f2;
+      display:grid;
+      place-items:center;
+      color:var(--teal);
+      box-shadow:0 13px 28px rgba(16,24,40,.10);
+    }
+    .earn-brief svg { width:48px; height:48px; stroke-width:1.8; }
+
+    .registered-search-row {
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) 280px;
+      gap:54px;
+      align-items:center;
+      margin:64px 0 0;
+    }
+    .registered-search-box {
+      height:95px;
+      width:100%;
+      border-radius:26px;
+      background:#fff;
+      border:1px solid #e7ecef;
+      box-shadow:0 16px 38px rgba(16,24,40,.08);
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) 1px minmax(0, .75fr) 84px;
+      align-items:center;
+      padding:0 10px 0 34px;
+      min-width:0;
+    }
+    .registered-search-box .search-field { font-size:clamp(18px, 1.9vw, 25px); color:#7b838f; gap:20px; }
+    .registered-search-box .search-field svg { width:32px; height:32px; color:#0e1b2b; stroke-width:2.1; }
+    .registered-search-box .divider { height:54px; background:#e2e7eb; }
+    .registered-search-box .search-submit { width:76px; height:76px; }
+    .registered-stat {
+      min-height:155px;
+      border-radius:20px;
+      border:1px solid #e6edf0;
+      background:#fff;
+      color:#0e1b2b;
+      box-shadow:0 14px 34px rgba(16,24,40,.07);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:18px;
+    }
+    .registered-stat strong { display:block; font-size:clamp(42px, 4.2vw, 62px); line-height:1; color:var(--teal); letter-spacing:-2px; font-weight:950; }
+    .registered-stat span { margin-top:12px; display:block; font-size:clamp(18px, 1.7vw, 26px); font-weight:760; color:#0e1b2b; }
+
+    .job-apply-row { display:none; margin-top:13px; align-items:center; gap:10px; }
+    body.jobsync-registered .job-apply-row { display:flex; }
+    .job-apply-btn-sync {
+      border:0;
+      min-height:32px;
+      padding:0 16px;
+      border-radius:999px;
+      background:linear-gradient(180deg,#178c82,#087168);
+      color:#fff;
+      font-weight:850;
+      font-size:13px;
+      box-shadow:0 10px 18px rgba(9,118,108,.18);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .job-apply-note { font-size:12px; color:#7a8490; font-weight:650; }
+
+    .job-premium-badge-sync {
+      align-self:flex-start;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:5px;
+      height:24px;
+      padding:0 10px;
+      border-radius:8px;
+      background:linear-gradient(135deg,#FFB000,#F6A400);
+      color:#fff;
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.25px;
+      text-transform:uppercase;
+      box-shadow:0 8px 16px rgba(246,164,0,.22);
+      white-space:nowrap;
+      line-height:1;
+    }
+    .job-premium-badge-sync svg { width:13px; height:13px; flex:0 0 auto; }
+    body.jobsync-registered .salary-action.has-premium { gap:clamp(5px, .65vw, 8px) !important; }
+    @media (max-width:560px) {
+      .job-premium-badge-sync { height:21px; padding:0 8px; font-size:9.3px; border-radius:7px; }
+      .job-premium-badge-sync svg { width:11px; height:11px; }
+    }
+
+    @media (max-width:980px) {
+      body.jobsync-registered { padding-top:clamp(77px, 11vw, 94px); }
+      .registered-dashboard { margin-bottom:clamp(36px, 6vw, 54px); }
+      .registered-top-row { margin-bottom:clamp(22px, 4vw, 34px); gap:14px; }
+      .registered-profile { gap:clamp(12px, 2vw, 17px); }
+      .registered-avatar { width:clamp(52px, 9vw, 74px); height:clamp(52px, 9vw, 74px); font-size:clamp(20px, 4vw, 30px); }
+      .registered-name-wrap h2 { max-width:42vw; font-size:clamp(20px, 3.2vw, 29px); }
+      .registered-name-wrap p { font-size:clamp(15px, 2.5vw, 22px); margin-top:5px; }
+      .registered-actions { gap:clamp(10px, 2vw, 16px); }
+      .registered-hours { min-height:clamp(54px, 8.5vw, 78px); border-radius:clamp(13px, 2vw, 18px); padding:0 clamp(10px, 2vw, 18px); gap:clamp(9px, 1.6vw, 14px); }
+      .registered-hours .clock { width:clamp(28px, 5vw, 38px); height:clamp(28px, 5vw, 38px); }
+      .registered-hours span { font-size:clamp(14px, 2.5vw, 22px); }
+      .registered-hours strong { width:clamp(42px, 6.6vw, 56px); height:clamp(42px, 6.6vw, 56px); font-size:clamp(16px, 2.7vw, 22px); }
+      .registered-list-btn { width:clamp(54px, 8.5vw, 78px); height:clamp(54px, 8.5vw, 78px); }
+      .registered-list-btn svg { width:clamp(27px, 4.5vw, 38px); height:clamp(27px, 4.5vw, 38px); }
+      .registered-earn-card { min-height:clamp(260px, 36vw, 356px); grid-template-columns:minmax(0, 1fr) minmax(220px, 43%); padding:clamp(24px, 4.2vw, 42px); }
+      .earn-kicker { font-size:clamp(16px, 2.8vw, 28px); gap:clamp(10px, 1.8vw, 18px); }
+      .earn-kicker svg { width:clamp(25px, 4vw, 34px); height:clamp(25px, 4vw, 34px); }
+      .earn-amount { margin-top:clamp(32px, 6vw, 56px); font-size:clamp(38px, 7vw, 72px); }
+      .working-btn { margin-top:clamp(36px, 6vw, 60px); height:clamp(58px, 8vw, 78px); border-radius:clamp(14px, 2vw, 18px); padding:0 clamp(18px, 3vw, 30px); }
+      .earn-person { height:clamp(280px, 45vw, 410px); right:2%; bottom:clamp(-50px, -5vw, -25px); }
+      .earn-float { width:clamp(50px, 7.5vw, 70px); height:clamp(50px, 7.5vw, 70px); }
+      .earn-float svg { width:clamp(25px, 4vw, 35px); height:clamp(25px, 4vw, 35px); }
+      .earn-brief { width:clamp(74px, 11vw, 104px); height:clamp(74px, 11vw, 104px); right:clamp(-14px, -1.8vw, -7px); bottom:clamp(-50px, -5.8vw, -32px); }
+      .earn-brief svg { width:clamp(36px, 5.5vw, 48px); height:clamp(36px, 5.5vw, 48px); }
+      .registered-search-row { margin-top:clamp(55px, 8.5vw, 75px); grid-template-columns:minmax(0, 1fr) clamp(140px, 22vw, 240px); gap:clamp(24px, 5vw, 48px); }
+      .registered-search-box { height:clamp(70px, 11vw, 98px); border-radius:clamp(18px, 3vw, 28px); grid-template-columns:minmax(0, 1fr) 1px minmax(0, .72fr) clamp(56px, 9vw, 78px); padding-left:clamp(20px, 4vw, 34px); }
+      .registered-search-box .search-field { font-size:clamp(15px, 2.6vw, 25px); gap:clamp(12px, 2vw, 20px); }
+      .registered-search-box .search-field svg { width:clamp(24px, 4.2vw, 33px); height:clamp(24px, 4.2vw, 33px); }
+      .registered-search-box .search-submit { width:clamp(52px, 8.8vw, 78px); height:clamp(52px, 8.8vw, 78px); }
+      .registered-stat { min-height:clamp(105px, 18vw, 155px); border-radius:clamp(15px, 2.5vw, 20px); }
+    }
+    @media (max-width:640px) {
+      .registered-top-row { align-items:flex-start; }
+      .registered-name-wrap h2 { max-width:42vw; }
+      .registered-hours { padding:0 11px; gap:9px; }
+      .registered-hours .clock { display:none; }
+      .registered-list-btn { display:none; }
+      .registered-earn-card {
+        display:block;
+        min-height:clamp(266px, 62vw, 355px);
+        padding:clamp(22px, 5vw, 34px);
+        border-radius:clamp(18px, 4vw, 24px);
+      }
+      .earn-copy { max-width:56%; }
+      .earn-kicker { font-size:clamp(14px, 4.1vw, 22px); }
+      .earn-amount { margin-top:clamp(30px, 8vw, 48px); font-size:clamp(34px, 10vw, 56px); letter-spacing:-2px; }
+      .working-btn { margin-top:clamp(26px, 7vw, 40px); height:clamp(52px, 12vw, 64px); font-size:clamp(15px, 4.2vw, 22px); padding:0 clamp(15px, 4vw, 24px); }
+      .earn-art { position:absolute; inset:0; z-index:2; pointer-events:none; }
+      .earn-person { height:78%; right:0; bottom:0; max-height:none; }
+      .earn-float.figma { left:65%; top:9%; }
+      .earn-float.drive { right:5%; top:23%; }
+      .earn-brief { right:-9px; bottom:-42px; }
+      .registered-search-row { grid-template-columns:1fr; gap:18px; margin-top:58px; }
+      .registered-stat { width:clamp(132px, 36vw, 170px); min-height:clamp(95px, 25vw, 122px); justify-self:end; margin-top:-10px; }
+      .registered-search-box { height:70px; grid-template-columns:minmax(0, 1fr) 1px minmax(0, .62fr) 56px; padding-left:20px; }
+      .registered-search-box .search-field span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    }
+    @media (max-width:420px) {
+      .registered-profile { gap:10px; }
+      .registered-avatar { width:48px; height:48px; font-size:18px; }
+      .registered-name-wrap h2 { max-width:43vw; font-size:18px; }
+      .registered-name-wrap p { font-size:14px; }
+      .registered-hours { min-height:48px; }
+      .registered-hours span { font-size:13px; }
+      .registered-hours strong { width:37px; height:37px; font-size:14px; }
+      .earn-copy { max-width:60%; }
+      .earn-person { height:72%; right:-8%; }
+      .registered-search-box { grid-template-columns:minmax(0, 1fr) 1px minmax(0, .58fr) 52px; padding-left:15px; }
+      .registered-search-box .search-field:nth-of-type(2) span { max-width:68px; }
+    }
+
+  
+
+    /* Compact registered dashboard update requested: remove the lower search/stat area, shorten the earnings card, and remove the person image after registration. */
+    body.jobsync-registered .registered-dashboard {
+      margin-bottom:clamp(22px, 3vw, 34px) !important;
+    }
+    body.jobsync-registered .registered-search-row {
+      display:none !important;
+      height:0 !important;
+      min-height:0 !important;
+      margin:0 !important;
+      padding:0 !important;
+      overflow:hidden !important;
+    }
+    body.jobsync-registered .registered-earn-card {
+      min-height:clamp(200px, 21vw, 250px) !important;
+      grid-template-columns:1fr !important;
+      gap:0 !important;
+      padding:clamp(24px, 3.1vw, 40px) !important;
+      overflow:hidden !important;
+    }
+    body.jobsync-registered .registered-earn-card::after {
+      background:radial-gradient(520px 230px at 76% 34%, rgba(255,255,255,.12), transparent 62%),
+                 radial-gradient(420px 180px at 98% 110%, rgba(16,144,132,.35), transparent 72%) !important;
+    }
+    body.jobsync-registered .earn-art,
+    body.jobsync-registered .earn-person,
+    body.jobsync-registered .earn-float,
+    body.jobsync-registered .earn-brief {
+      display:none !important;
+    }
+    body.jobsync-registered .earn-copy {
+      max-width:min(560px, 100%) !important;
+    }
+    body.jobsync-registered .earn-kicker {
+      font-size:clamp(18px, 1.75vw, 26px) !important;
+      gap:14px !important;
+    }
+    body.jobsync-registered .earn-kicker svg {
+      width:clamp(26px, 2.3vw, 32px) !important;
+      height:clamp(26px, 2.3vw, 32px) !important;
+    }
+    body.jobsync-registered .earn-amount {
+      margin-top:clamp(20px, 2.35vw, 30px) !important;
+      font-size:clamp(42px, 4.7vw, 68px) !important;
+      letter-spacing:-2.6px !important;
+    }
+    body.jobsync-registered .working-btn {
+      margin-top:clamp(20px, 2.35vw, 30px) !important;
+      width:min(360px, 100%) !important;
+      height:clamp(54px, 5.5vw, 68px) !important;
+      padding:0 clamp(18px, 2.5vw, 26px) !important;
+      font-size:clamp(16px, 1.7vw, 23px) !important;
+      border-radius:16px !important;
+    }
+    body.jobsync-registered .bottom-nav a.active svg.dashboard-icon {
+      fill:none !important;
+      stroke:currentColor !important;
+    }
+
+    @media (max-width: 980px) {
+      body.jobsync-registered .registered-dashboard { margin-bottom:clamp(26px, 5vw, 42px) !important; }
+      body.jobsync-registered .registered-earn-card {
+        min-height:clamp(190px, 41vw, 250px) !important;
+        padding:clamp(22px, 5vw, 34px) !important;
+      }
+      body.jobsync-registered .earn-amount {
+        margin-top:clamp(20px, 4vw, 30px) !important;
+        font-size:clamp(42px, 9.5vw, 64px) !important;
+      }
+      body.jobsync-registered .working-btn {
+        margin-top:clamp(18px, 4vw, 28px) !important;
+        width:min(330px, 72vw) !important;
+        height:clamp(54px, 9vw, 68px) !important;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body.jobsync-registered .registered-top-row {
+        margin-bottom:18px !important;
+      }
+      body.jobsync-registered .registered-earn-card {
+        min-height:210px !important;
+        padding:22px !important;
+        border-radius:18px !important;
+      }
+      body.jobsync-registered .earn-kicker {
+        font-size:18px !important;
+        gap:10px !important;
+      }
+      body.jobsync-registered .earn-kicker svg {
+        width:25px !important;
+        height:25px !important;
+      }
+      body.jobsync-registered .earn-amount {
+        margin-top:25px !important;
+        font-size:48px !important;
+        letter-spacing:-2px !important;
+      }
+      body.jobsync-registered .working-btn {
+        margin-top:24px !important;
+        width:220px !important;
+        max-width:100% !important;
+        height:58px !important;
+        font-size:17px !important;
+        padding:0 18px !important;
+      }
+    }
+
+
+
+    /* Mature compact earnings card: smaller typography, cleaner spacing, no unused visual bulk. */
+    body.jobsync-registered .registered-earn-card {
+      min-height:clamp(160px, 17vw, 205px) !important;
+      padding:clamp(20px, 2.4vw, 32px) !important;
+      border-radius:20px !important;
+      background:
+        radial-gradient(420px 150px at 88% 15%, rgba(255,255,255,.11), transparent 64%),
+        radial-gradient(300px 130px at 12% 100%, rgba(16,144,132,.24), transparent 70%),
+        linear-gradient(135deg,#0b7a70 0%,#065c55 58%,#064f49 100%) !important;
+      border:1px solid rgba(255,255,255,.12) !important;
+      box-shadow:0 18px 38px rgba(8,113,104,.16) !important;
+    }
+    body.jobsync-registered .earn-copy {
+      display:grid !important;
+      align-content:center !important;
+      max-width:100% !important;
+    }
+    body.jobsync-registered .earn-kicker {
+      font-size:clamp(14px, 1.2vw, 18px) !important;
+      gap:10px !important;
+      font-weight:760 !important;
+      letter-spacing:-.18px !important;
+      opacity:.96 !important;
+    }
+    body.jobsync-registered .earn-kicker svg {
+      width:clamp(21px, 1.7vw, 26px) !important;
+      height:clamp(21px, 1.7vw, 26px) !important;
+      stroke-width:1.7 !important;
+      opacity:.95 !important;
+    }
+    body.jobsync-registered .earn-amount {
+      margin-top:clamp(12px, 1.35vw, 18px) !important;
+      font-size:clamp(34px, 3.25vw, 50px) !important;
+      line-height:1 !important;
+      letter-spacing:-1.8px !important;
+      text-shadow:0 10px 24px rgba(0,0,0,.14) !important;
+    }
+    body.jobsync-registered .working-btn {
+      margin-top:clamp(14px, 1.55vw, 22px) !important;
+      width:min(295px, 100%) !important;
+      height:clamp(44px, 4.3vw, 54px) !important;
+      padding:0 clamp(15px, 1.8vw, 22px) !important;
+      font-size:clamp(13px, 1.2vw, 17px) !important;
+      border-radius:14px !important;
+      background:rgba(255,255,255,.075) !important;
+      border-color:rgba(255,255,255,.28) !important;
+    }
+    body.jobsync-registered .working-btn svg {
+      width:20px !important;
+      height:20px !important;
+      opacity:.9 !important;
+    }
+    @media (max-width:560px){
+      body.jobsync-registered .registered-earn-card {
+        min-height:165px !important;
+        padding:20px !important;
+        border-radius:17px !important;
+      }
+      body.jobsync-registered .earn-kicker {
+        font-size:15px !important;
+        gap:9px !important;
+      }
+      body.jobsync-registered .earn-kicker svg {
+        width:21px !important;
+        height:21px !important;
+      }
+      body.jobsync-registered .earn-amount {
+        margin-top:14px !important;
+        font-size:38px !important;
+        letter-spacing:-1.5px !important;
+      }
+      body.jobsync-registered .working-btn {
+        margin-top:15px !important;
+        width:190px !important;
+        height:46px !important;
+        font-size:13px !important;
+        padding:0 14px !important;
+      }
+    }
+
+
+
+    /* Final requested update: smaller mature registered earnings card and Image Annotation category. */
+    body.jobsync-registered .registered-dashboard {
+      margin-bottom:clamp(18px, 2.4vw, 28px) !important;
+    }
+    body.jobsync-registered .registered-top-row {
+      margin-bottom:clamp(14px, 2vw, 24px) !important;
+    }
+    body.jobsync-registered .registered-earn-card {
+      width:100% !important;
+      min-height:clamp(118px, 11.8vw, 156px) !important;
+      max-height:none !important;
+      padding:clamp(14px, 1.8vw, 22px) clamp(16px, 2.1vw, 26px) !important;
+      border-radius:clamp(16px, 1.8vw, 22px) !important;
+      background:
+        radial-gradient(360px 130px at 90% 14%, rgba(255,255,255,.12), transparent 65%),
+        linear-gradient(135deg,#0f8a7f 0%,#08756b 52%,#065c55 100%) !important;
+      box-shadow:0 14px 28px rgba(8,113,104,.13) !important;
+    }
+    body.jobsync-registered .registered-earn-card::after {
+      opacity:.36 !important;
+    }
+    body.jobsync-registered .earn-copy {
+      justify-content:center !important;
+      align-content:center !important;
+      gap:0 !important;
+    }
+    body.jobsync-registered .earn-kicker {
+      font-size:clamp(10px, .78vw, 13px) !important;
+      gap:7px !important;
+      font-weight:760 !important;
+      letter-spacing:-.1px !important;
+    }
+    body.jobsync-registered .earn-kicker svg {
+      width:clamp(16px, 1.15vw, 20px) !important;
+      height:clamp(16px, 1.15vw, 20px) !important;
+      stroke-width:1.65 !important;
+    }
+    body.jobsync-registered .earn-amount {
+      margin-top:clamp(8px, .9vw, 12px) !important;
+      font-size:clamp(24px, 2.2vw, 34px) !important;
+      line-height:.98 !important;
+      letter-spacing:-1.2px !important;
+      text-shadow:0 8px 18px rgba(0,0,0,.12) !important;
+    }
+    body.jobsync-registered .working-btn {
+      margin-top:clamp(9px, 1vw, 13px) !important;
+      width:min(210px, 100%) !important;
+      height:clamp(34px, 3vw, 42px) !important;
+      padding:0 clamp(10px, 1.2vw, 15px) !important;
+      border-radius:12px !important;
+      font-size:clamp(10px, .85vw, 13px) !important;
+      font-weight:750 !important;
+      background:rgba(255,255,255,.07) !important;
+      border-color:rgba(255,255,255,.24) !important;
+    }
+    body.jobsync-registered .working-btn svg {
+      width:15px !important;
+      height:15px !important;
+    }
+    .category-card[data-category="design"] h3 {
+      max-width:120px;
+      line-height:1.08;
+      text-align:center;
+    }
+    .category-card[data-category="design"] .cat-icon svg {
+      width:31px;
+      height:31px;
+    }
+    @media (max-width:980px){
+      body.jobsync-registered .registered-dashboard {
+        margin-bottom:clamp(30px, 6vw, 50px) !important;
+      }
+      body.jobsync-registered .registered-earn-card {
+        min-height:clamp(132px, 25vw, 190px) !important;
+        padding:clamp(16px, 3.7vw, 26px) !important;
+      }
+      body.jobsync-registered .earn-kicker {
+        font-size:clamp(12px, 2.15vw, 16px) !important;
+        gap:clamp(7px, 1.3vw, 10px) !important;
+      }
+      body.jobsync-registered .earn-kicker svg {
+        width:clamp(18px, 3.2vw, 24px) !important;
+        height:clamp(18px, 3.2vw, 24px) !important;
+      }
+      body.jobsync-registered .earn-amount {
+        margin-top:clamp(9px, 2vw, 15px) !important;
+        font-size:clamp(28px, 6.4vw, 48px) !important;
+        letter-spacing:-1.6px !important;
+      }
+      body.jobsync-registered .working-btn {
+        margin-top:clamp(10px, 2.4vw, 18px) !important;
+        width:min(235px, 60vw) !important;
+        height:clamp(39px, 7.3vw, 56px) !important;
+        font-size:clamp(11px, 2.2vw, 16px) !important;
+      }
+    }
+    @media (max-width:560px){
+      body.jobsync-registered .registered-earn-card {
+        min-height:142px !important;
+        padding:16px 18px !important;
+        border-radius:17px !important;
+      }
+      body.jobsync-registered .earn-kicker {
+        font-size:12px !important;
+        gap:7px !important;
+      }
+      body.jobsync-registered .earn-kicker svg {
+        width:18px !important;
+        height:18px !important;
+      }
+      body.jobsync-registered .earn-amount {
+        margin-top:10px !important;
+        font-size:30px !important;
+        letter-spacing:-1px !important;
+      }
+      body.jobsync-registered .working-btn {
+        margin-top:12px !important;
+        width:165px !important;
+        height:39px !important;
+        font-size:11px !important;
+        border-radius:11px !important;
+      }
+      .category-card[data-category="design"] h3 {
+        font-size:clamp(11px, 2.8vw, 15px) !important;
+        max-width:92px;
+      }
+    }
+
+
+
+    /* Final strict adjustment: 50% smaller text and 30% smaller estimated-earnings card after registration. */
+    body.jobsync-registered .registered-earn-card {
+      min-height:clamp(95px, 8.2vw, 118px) !important;
+      padding:clamp(10px, 1.2vw, 15px) clamp(12px, 1.5vw, 18px) !important;
+      border-radius:clamp(13px, 1.45vw, 18px) !important;
+      background:
+        radial-gradient(280px 110px at 88% 12%, rgba(255,255,255,.105), transparent 66%),
+        linear-gradient(135deg,#0b8076 0%,#087168 58%,#05564f 100%) !important;
+      box-shadow:0 10px 24px rgba(8,113,104,.12) !important;
+    }
+    body.jobsync-registered .earn-kicker {
+      font-size:clamp(8.5px, .62vw, 10.5px) !important;
+      gap:5px !important;
+      letter-spacing:.02em !important;
+    }
+    body.jobsync-registered .earn-kicker svg {
+      width:clamp(13px, .9vw, 16px) !important;
+      height:clamp(13px, .9vw, 16px) !important;
+      stroke-width:1.55 !important;
+    }
+    body.jobsync-registered .earn-amount {
+      margin-top:clamp(5px, .6vw, 8px) !important;
+      font-size:clamp(20px, 1.55vw, 26px) !important;
+      letter-spacing:-.65px !important;
+      line-height:1 !important;
+    }
+    body.jobsync-registered .working-btn {
+      margin-top:clamp(7px, .75vw, 10px) !important;
+      width:min(155px, 100%) !important;
+      height:clamp(28px, 2.2vw, 34px) !important;
+      font-size:clamp(8.5px, .66vw, 10.5px) !important;
+      border-radius:10px !important;
+    }
+    body.jobsync-registered .working-btn svg {
+      width:12px !important;
+      height:12px !important;
+    }
+    @media (max-width:980px){
+      body.jobsync-registered .registered-earn-card {
+        min-height:clamp(98px, 18.5vw, 132px) !important;
+        padding:clamp(11px, 2.45vw, 17px) !important;
+      }
+      body.jobsync-registered .earn-kicker {
+        font-size:clamp(9.5px, 1.45vw, 12px) !important;
+      }
+      body.jobsync-registered .earn-kicker svg {
+        width:clamp(14px, 2.2vw, 17px) !important;
+        height:clamp(14px, 2.2vw, 17px) !important;
+      }
+      body.jobsync-registered .earn-amount {
+        margin-top:clamp(5px, 1.1vw, 8px) !important;
+        font-size:clamp(22px, 4.15vw, 34px) !important;
+      }
+      body.jobsync-registered .working-btn {
+        margin-top:clamp(8px, 1.7vw, 12px) !important;
+        width:min(160px, 48vw) !important;
+        height:clamp(30px, 5.1vw, 40px) !important;
+        font-size:clamp(9px, 1.45vw, 12px) !important;
+      }
+    }
+    @media (max-width:560px){
+      body.jobsync-registered .registered-earn-card {
+        min-height:105px !important;
+        padding:12px 14px !important;
+      }
+      body.jobsync-registered .earn-kicker {
+        font-size:10px !important;
+      }
+      body.jobsync-registered .earn-kicker svg {
+        width:14px !important;
+        height:14px !important;
+      }
+      body.jobsync-registered .earn-amount {
+        font-size:23px !important;
+        margin-top:6px !important;
+      }
+      body.jobsync-registered .working-btn {
+        width:138px !important;
+        height:31px !important;
+        font-size:9px !important;
+        margin-top:8px !important;
+      }
+    }
+
+
+    /* User requested: move compact earnings card content into the left indicated area and add visible select buttons to plans. */
+    body.jobsync-registered .registered-earn-card {
+      display:flex !important;
+      align-items:center !important;
+      justify-content:flex-start !important;
+    }
+    body.jobsync-registered .earn-copy {
+      width:min(42%, 340px) !important;
+      min-width:180px !important;
+      max-width:340px !important;
+      margin-left:clamp(20px, 5.2vw, 74px) !important;
+      text-align:left !important;
+      justify-content:start !important;
+      align-content:center !important;
+      justify-items:start !important;
+    }
+    body.jobsync-registered .earn-kicker,
+    body.jobsync-registered .earn-amount,
+    body.jobsync-registered .working-btn {
+      align-self:start !important;
+      justify-self:start !important;
+    }
+    .jobsync-select-plan-btn {
+      margin-top:16px;
+      width:100%;
+      min-height:44px;
+      border-radius:14px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      background:linear-gradient(135deg,var(--orange),#ffc038);
+      color:#073f3a;
+      font-size:14px;
+      font-weight:950;
+      box-shadow:0 14px 24px rgba(246,164,0,.22);
+      border:0;
+    }
+    .jobsync-plan-card:hover .jobsync-select-plan-btn {
+      transform:translateY(-1px);
+      box-shadow:0 18px 28px rgba(246,164,0,.28);
+    }
+    @media (max-width:560px){
+      body.jobsync-registered .earn-copy {
+        width:48% !important;
+        min-width:158px !important;
+        margin-left:clamp(18px, 6.8vw, 34px) !important;
+      }
+    }
+
+
+
+    /* Requested update: move Apply Now + verification text to the right blank area and reduce all recommended job-card heights. */
+    body.jobsync-registered .job-card {
+      position:relative !important;
+      min-height:clamp(88px, 8.5vw, 112px) !important;
+      grid-template-columns:clamp(46px, 5.5vw, 60px) minmax(0,1fr) auto clamp(22px, 2.4vw, 28px) !important;
+      gap:clamp(9px, 1.35vw, 14px) !important;
+      align-items:center !important;
+      padding:clamp(10px, 1.3vw, 15px) clamp(14px, 1.6vw, 18px) !important;
+      border-radius:clamp(13px, 1.45vw, 18px) !important;
+    }
+    body.jobsync-registered .brand-icon {
+      width:clamp(42px, 5vw, 56px) !important;
+      height:clamp(42px, 5vw, 56px) !important;
+      border-radius:clamp(11px, 1.2vw, 14px) !important;
+    }
+    body.jobsync-registered .brand-icon svg {
+      max-width:72% !important;
+      max-height:72% !important;
+    }
+    body.jobsync-registered .job-info h3 {
+      font-size:clamp(13px, 1.15vw, 16px) !important;
+      margin-bottom:clamp(5px, .55vw, 8px) !important;
+      max-width:100% !important;
+    }
+    body.jobsync-registered .job-info .meta {
+      font-size:clamp(11px, .95vw, 14px) !important;
+      gap:5px !important;
+      line-height:1.15 !important;
+    }
+    body.jobsync-registered .labels {
+      margin-top:clamp(7px, .78vw, 10px) !important;
+      gap:clamp(6px, .65vw, 9px) !important;
+      padding-right:clamp(116px, 14vw, 190px) !important;
+      flex-wrap:nowrap !important;
+      overflow:hidden !important;
+    }
+    body.jobsync-registered .label {
+      height:clamp(21px, 1.9vw, 25px) !important;
+      padding:0 clamp(9px, .85vw, 13px) !important;
+      font-size:clamp(9.5px, .75vw, 12px) !important;
+      white-space:nowrap !important;
+      flex:0 0 auto !important;
+    }
+    body.jobsync-registered .salary {
+      align-self:start !important;
+      padding-top:2px !important;
+      font-size:clamp(11px, .9vw, 13px) !important;
+      line-height:1.15 !important;
+      margin-right:2px !important;
+    }
+    body.jobsync-registered .save-wrap {
+      height:100% !important;
+      min-height:64px !important;
+      justify-content:space-between !important;
+      align-items:flex-end !important;
+    }
+    body.jobsync-registered .save-wrap svg {
+      width:clamp(20px, 2vw, 24px) !important;
+      height:clamp(20px, 2vw, 24px) !important;
+    }
+    body.jobsync-registered .time {
+      font-size:clamp(10px, .8vw, 12px) !important;
+      line-height:1 !important;
+    }
+    body.jobsync-registered .job-apply-row {
+      position:absolute !important;
+      right:clamp(48px, 6.3vw, 76px) !important;
+      bottom:clamp(10px, 1.05vw, 14px) !important;
+      margin:0 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:flex-end !important;
+      gap:clamp(6px, .75vw, 10px) !important;
+      max-width:clamp(150px, 20vw, 245px) !important;
+      z-index:5 !important;
+      pointer-events:auto !important;
+    }
+    body.jobsync-registered .job-apply-btn-sync {
+      min-height:clamp(27px, 2.45vw, 34px) !important;
+      padding:0 clamp(12px, 1.3vw, 18px) !important;
+      font-size:clamp(10.5px, .9vw, 13px) !important;
+      line-height:1 !important;
+      box-shadow:0 8px 16px rgba(9,118,108,.16) !important;
+    }
+    body.jobsync-registered .job-apply-note {
+      font-size:clamp(9.5px, .78vw, 12px) !important;
+      line-height:1.12 !important;
+      max-width:clamp(48px, 7vw, 92px) !important;
+      color:#687483 !important;
+    }
+    @media (max-width:980px) {
+      body.jobsync-registered .jobs-list { gap:clamp(10px, 2vw, 14px) !important; }
+      body.jobsync-registered .job-card {
+        min-height:clamp(102px, 20vw, 128px) !important;
+        padding:clamp(12px, 2.6vw, 18px) clamp(14px, 3vw, 22px) !important;
+        grid-template-columns:clamp(48px, 9vw, 64px) minmax(0,1fr) auto clamp(22px, 4vw, 30px) !important;
+        gap:clamp(9px, 2vw, 15px) !important;
+      }
+      body.jobsync-registered .labels {
+        padding-right:clamp(118px, 29vw, 210px) !important;
+        margin-top:clamp(8px, 1.7vw, 12px) !important;
+      }
+      body.jobsync-registered .job-apply-row {
+        right:clamp(44px, 9.5vw, 74px) !important;
+        bottom:clamp(13px, 2.8vw, 18px) !important;
+        max-width:clamp(138px, 38vw, 230px) !important;
+      }
+      body.jobsync-registered .job-apply-btn-sync {
+        min-height:clamp(30px, 6.2vw, 38px) !important;
+        padding:0 clamp(13px, 3.4vw, 20px) !important;
+        font-size:clamp(12px, 2.6vw, 15px) !important;
+      }
+      body.jobsync-registered .job-apply-note {
+        font-size:clamp(10px, 2.15vw, 13px) !important;
+        max-width:clamp(54px, 16vw, 90px) !important;
+      }
+    }
+    @media (max-width:560px) {
+      body.jobsync-registered .job-card {
+        min-height:112px !important;
+        padding:13px 14px !important;
+        grid-template-columns:48px minmax(0,1fr) auto 22px !important;
+        gap:9px !important;
+        border-radius:18px !important;
+      }
+      body.jobsync-registered .brand-icon {
+        width:44px !important;
+        height:44px !important;
+      }
+      body.jobsync-registered .job-info h3 {
+        font-size:14px !important;
+        max-width:150px !important;
+      }
+      body.jobsync-registered .job-info .meta {
+        font-size:12px !important;
+      }
+      body.jobsync-registered .labels {
+        padding-right:130px !important;
+        gap:6px !important;
+      }
+      body.jobsync-registered .label {
+        height:23px !important;
+        font-size:10px !important;
+        padding:0 9px !important;
+      }
+      body.jobsync-registered .salary {
+        font-size:12px !important;
+        max-width:88px !important;
+        overflow:hidden !important;
+        text-overflow:ellipsis !important;
+      }
+      body.jobsync-registered .save-wrap {
+        min-height:78px !important;
+      }
+      body.jobsync-registered .job-apply-row {
+        right:43px !important;
+        bottom:13px !important;
+        max-width:145px !important;
+        gap:6px !important;
+      }
+      body.jobsync-registered .job-apply-btn-sync {
+        min-height:31px !important;
+        padding:0 14px !important;
+        font-size:12px !important;
+      }
+      body.jobsync-registered .job-apply-note {
+        font-size:10.5px !important;
+        max-width:52px !important;
+      }
+    }
+    @media (max-width:390px) {
+      body.jobsync-registered .job-card {
+        grid-template-columns:44px minmax(0,1fr) auto 20px !important;
+        gap:8px !important;
+        min-height:106px !important;
+        padding:12px !important;
+      }
+      body.jobsync-registered .brand-icon { width:40px !important; height:40px !important; }
+      body.jobsync-registered .job-info h3 { font-size:13px !important; max-width:132px !important; }
+      body.jobsync-registered .job-info .meta { font-size:11px !important; }
+      body.jobsync-registered .labels { padding-right:116px !important; }
+      body.jobsync-registered .label { height:21px !important; font-size:9px !important; padding:0 8px !important; }
+      body.jobsync-registered .salary { font-size:10.5px !important; max-width:78px !important; }
+      body.jobsync-registered .job-apply-row { right:38px !important; bottom:12px !important; max-width:128px !important; }
+      body.jobsync-registered .job-apply-btn-sync { min-height:28px !important; padding:0 11px !important; font-size:10.5px !important; }
+      body.jobsync-registered .job-apply-note { font-size:9.5px !important; max-width:48px !important; }
+    }
+
+
+    /* Final fix: place Apply Now + verification in the right blank column without covering title, tags, salary, bookmark or time. */
+    body.jobsync-registered .job-card {
+      display:grid !important;
+      position:relative !important;
+      grid-template-columns: clamp(44px, 5vw, 58px) minmax(0, 1fr) minmax(138px, clamp(148px, 17vw, 210px)) clamp(22px, 2.4vw, 28px) !important;
+      gap: clamp(8px, 1.05vw, 14px) !important;
+      min-height: clamp(94px, 8vw, 112px) !important;
+      align-items:center !important;
+    }
+    body.jobsync-registered .job-info { min-width:0 !important; padding-right:0 !important; }
+    body.jobsync-registered .job-info h3 { max-width:100% !important; }
+    body.jobsync-registered .labels {
+      padding-right:0 !important;
+      max-width:100% !important;
+      flex-wrap:nowrap !important;
+      overflow:hidden !important;
+    }
+    body.jobsync-registered .salary-action {
+      min-width:0 !important;
+      height:100% !important;
+      align-self:stretch !important;
+      display:flex !important;
+      flex-direction:column !important;
+      align-items:flex-start !important;
+      justify-content:center !important;
+      gap:clamp(7px, .8vw, 10px) !important;
+      padding-top:0 !important;
+    }
+    body.jobsync-registered .salary-action .salary {
+      align-self:auto !important;
+      padding:0 !important;
+      margin:0 !important;
+      font-size:clamp(11px, .9vw, 13px) !important;
+      line-height:1.1 !important;
+      max-width:100% !important;
+      overflow:hidden !important;
+      text-overflow:ellipsis !important;
+      white-space:nowrap !important;
+    }
+    body.jobsync-registered .salary-action .job-apply-row {
+      position:static !important;
+      right:auto !important;
+      bottom:auto !important;
+      margin:0 !important;
+      width:100% !important;
+      max-width:none !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:flex-start !important;
+      gap:clamp(5px, .55vw, 8px) !important;
+      z-index:auto !important;
+      pointer-events:auto !important;
+    }
+    body.jobsync-registered .salary-action .job-apply-btn-sync {
+      flex:0 0 auto !important;
+      min-height:clamp(27px, 2.35vw, 34px) !important;
+      padding:0 clamp(11px, 1.1vw, 17px) !important;
+      font-size:clamp(10.5px, .85vw, 13px) !important;
+      white-space:nowrap !important;
+    }
+    body.jobsync-registered .salary-action .job-apply-note {
+      min-width:0 !important;
+      flex:1 1 auto !important;
+      max-width:clamp(48px, 6.4vw, 86px) !important;
+      font-size:clamp(9.5px, .75vw, 12px) !important;
+      line-height:1.08 !important;
+      color:#687483 !important;
+    }
+    body.jobsync-registered .save-wrap {
+      align-self:stretch !important;
+      min-height:0 !important;
+      height:100% !important;
+      display:flex !important;
+      flex-direction:column !important;
+      align-items:flex-end !important;
+      justify-content:space-between !important;
+    }
+    @media (max-width:980px) {
+      body.jobsync-registered .job-card {
+        grid-template-columns: clamp(44px, 8.8vw, 58px) minmax(0, 1fr) clamp(126px, 31vw, 170px) clamp(20px, 4vw, 28px) !important;
+        min-height: clamp(98px, 19vw, 118px) !important;
+        gap:clamp(8px, 1.8vw, 12px) !important;
+      }
+      body.jobsync-registered .salary-action { gap:clamp(6px, 1.3vw, 8px) !important; justify-content:center !important; }
+      body.jobsync-registered .salary-action .salary { font-size:clamp(11px, 2.3vw, 13px) !important; }
+      body.jobsync-registered .salary-action .job-apply-btn-sync { min-height:clamp(28px, 5.7vw, 34px) !important; padding:0 clamp(10px, 2.5vw, 16px) !important; font-size:clamp(11px, 2.25vw, 13px) !important; }
+      body.jobsync-registered .salary-action .job-apply-note { font-size:clamp(9.5px, 2vw, 11.5px) !important; max-width:clamp(44px, 12vw, 62px) !important; }
+    }
+    @media (max-width:560px) {
+      body.jobsync-registered .job-card {
+        grid-template-columns:44px minmax(0, 1fr) 128px 21px !important;
+        min-height:104px !important;
+        padding:12px 13px !important;
+        gap:8px !important;
+      }
+      body.jobsync-registered .job-info h3 { max-width:100% !important; font-size:13.5px !important; }
+      body.jobsync-registered .job-info .meta { font-size:11.5px !important; }
+      body.jobsync-registered .label { height:21px !important; font-size:9.5px !important; padding:0 8px !important; }
+      body.jobsync-registered .salary-action .job-apply-row { gap:5px !important; }
+      body.jobsync-registered .salary-action .job-apply-btn-sync { min-height:29px !important; padding:0 11px !important; font-size:11px !important; }
+      body.jobsync-registered .salary-action .job-apply-note { max-width:45px !important; font-size:9.5px !important; }
+      body.jobsync-registered .time { font-size:10px !important; }
+    }
+    @media (max-width:390px) {
+      body.jobsync-registered .job-card {
+        grid-template-columns:40px minmax(0, 1fr) 114px 20px !important;
+        min-height:100px !important;
+        padding:11px !important;
+        gap:7px !important;
+      }
+      body.jobsync-registered .brand-icon { width:38px !important; height:38px !important; }
+      body.jobsync-registered .job-info h3 { font-size:12.5px !important; }
+      body.jobsync-registered .job-info .meta { font-size:10.5px !important; }
+      body.jobsync-registered .labels { gap:4px !important; }
+      body.jobsync-registered .label { height:20px !important; font-size:8.6px !important; padding:0 7px !important; }
+      body.jobsync-registered .salary-action .salary { font-size:10.2px !important; }
+      body.jobsync-registered .salary-action .job-apply-btn-sync { min-height:27px !important; padding:0 9px !important; font-size:10px !important; }
+      body.jobsync-registered .salary-action .job-apply-note { max-width:38px !important; font-size:8.6px !important; }
+    }
+
+
+
+    /* Strict lock: registered estimated-earnings content stays only inside the left indicated area. */
+    body.jobsync-registered .registered-earn-card {
+      position:relative !important;
+      display:block !important;
+      overflow:hidden !important;
+    }
+    body.jobsync-registered .registered-earn-card .earn-copy {
+      position:absolute !important;
+      left:clamp(34px, 6.4vw, 76px) !important;
+      top:50% !important;
+      transform:translateY(-50%) !important;
+      width:clamp(150px, 24vw, 255px) !important;
+      min-width:0 !important;
+      max-width:clamp(150px, 24vw, 255px) !important;
+      margin:0 !important;
+      display:block !important;
+      text-align:left !important;
+      z-index:3 !important;
+    }
+    body.jobsync-registered .registered-earn-card .earn-kicker {
+      display:flex !important;
+      align-items:center !important;
+      justify-content:flex-start !important;
+      width:100% !important;
+      max-width:100% !important;
+      white-space:nowrap !important;
+      overflow:hidden !important;
+      text-overflow:ellipsis !important;
+      font-size:clamp(8px, .62vw, 10.5px) !important;
+      gap:5px !important;
+      margin:0 !important;
+    }
+    body.jobsync-registered .registered-earn-card .earn-kicker svg {
+      flex:0 0 auto !important;
+      width:clamp(12px, .9vw, 16px) !important;
+      height:clamp(12px, .9vw, 16px) !important;
+    }
+    body.jobsync-registered .registered-earn-card .earn-amount {
+      width:100% !important;
+      max-width:100% !important;
+      margin-top:clamp(5px, .58vw, 8px) !important;
+      font-size:clamp(19px, 1.5vw, 26px) !important;
+      line-height:1 !important;
+      letter-spacing:-.65px !important;
+      white-space:nowrap !important;
+      overflow:hidden !important;
+      text-overflow:clip !important;
+    }
+    body.jobsync-registered .registered-earn-card .working-btn {
+      margin-top:clamp(7px, .75vw, 10px) !important;
+      width:clamp(125px, 15vw, 165px) !important;
+      max-width:100% !important;
+      height:clamp(28px, 2.15vw, 34px) !important;
+      padding:0 clamp(8px, .9vw, 12px) !important;
+      font-size:clamp(8px, .62vw, 10.5px) !important;
+      line-height:1 !important;
+      border-radius:10px !important;
+    }
+    body.jobsync-registered .registered-earn-card .working-btn svg {
+      width:12px !important;
+      height:12px !important;
+      flex:0 0 auto !important;
+    }
+    @media (max-width:980px){
+      body.jobsync-registered .registered-earn-card .earn-copy {
+        left:clamp(38px, 8.7vw, 68px) !important;
+        width:clamp(145px, 36vw, 210px) !important;
+        max-width:clamp(145px, 36vw, 210px) !important;
+      }
+      body.jobsync-registered .registered-earn-card .earn-kicker { font-size:clamp(9px, 1.35vw, 11px) !important; }
+      body.jobsync-registered .registered-earn-card .earn-amount { font-size:clamp(20px, 3.7vw, 30px) !important; }
+      body.jobsync-registered .registered-earn-card .working-btn {
+        width:clamp(130px, 34vw, 165px) !important;
+        height:clamp(29px, 4.8vw, 36px) !important;
+        font-size:clamp(8.5px, 1.35vw, 11px) !important;
+      }
+    }
+    @media (max-width:560px){
+      body.jobsync-registered .registered-earn-card .earn-copy {
+        left:clamp(45px, 12vw, 58px) !important;
+        top:50% !important;
+        width:clamp(136px, 38vw, 165px) !important;
+        max-width:clamp(136px, 38vw, 165px) !important;
+      }
+      body.jobsync-registered .registered-earn-card .earn-kicker { font-size:9px !important; gap:4px !important; }
+      body.jobsync-registered .registered-earn-card .earn-kicker svg { width:12px !important; height:12px !important; }
+      body.jobsync-registered .registered-earn-card .earn-amount { font-size:21px !important; margin-top:5px !important; letter-spacing:-.55px !important; }
+      body.jobsync-registered .registered-earn-card .working-btn { width:128px !important; height:29px !important; font-size:8.5px !important; margin-top:7px !important; padding:0 8px !important; }
+      body.jobsync-registered .registered-earn-card .working-btn svg { width:10px !important; height:10px !important; }
+    }
+    @media (max-width:390px){
+      body.jobsync-registered .registered-earn-card .earn-copy { left:34px !important; width:128px !important; max-width:128px !important; }
+      body.jobsync-registered .registered-earn-card .earn-amount { font-size:19px !important; }
+      body.jobsync-registered .registered-earn-card .working-btn { width:120px !important; font-size:8px !important; }
+    }
+
+
+/* Final visual update: use the transparent RemoTasks person artwork on both Home and Dashboard. */
+.hero-art img {
+  width:100% !important;
+  height:100% !important;
+  object-fit:contain !important;
+  object-position:right bottom !important;
+  filter:saturate(1.04) drop-shadow(0 14px 22px rgba(10, 28, 42, .10)) !important;
+}
+body.jobsync-registered .registered-earn-card {
+  display:grid !important;
+  grid-template-columns:minmax(0, 1fr) minmax(150px, 40%) !important;
+  align-items:center !important;
+  min-height:clamp(154px, 16vw, 218px) !important;
+  padding:clamp(16px, 2.1vw, 28px) !important;
+  overflow:hidden !important;
+}
+body.jobsync-registered .registered-earn-card .earn-copy {
+  position:relative !important;
+  left:auto !important;
+  top:auto !important;
+  transform:none !important;
+  width:min(270px, 100%) !important;
+  min-width:0 !important;
+  max-width:270px !important;
+  margin:0 0 0 clamp(18px, 3.6vw, 44px) !important;
+  display:block !important;
+  text-align:left !important;
+  align-self:center !important;
+  justify-self:start !important;
+  z-index:5 !important;
+}
+body.jobsync-registered .registered-earn-card .earn-art {
+  display:block !important;
+  position:relative !important;
+  inset:auto !important;
+  min-height:100% !important;
+  height:100% !important;
+  align-self:stretch !important;
+  justify-self:stretch !important;
+  z-index:4 !important;
+  pointer-events:none !important;
+}
+body.jobsync-registered .registered-earn-card .earn-person {
+  display:block !important;
+  position:absolute !important;
+  right:clamp(-34px, -2.4vw, -14px) !important;
+  bottom:clamp(-56px, -4.5vw, -26px) !important;
+  height:clamp(198px, 25.5vw, 342px) !important;
+  width:auto !important;
+  max-height:none !important;
+  object-fit:contain !important;
+  filter:saturate(1.04) drop-shadow(0 18px 24px rgba(0,0,0,.16)) !important;
+}
+body.jobsync-registered .registered-earn-card .earn-float,
+body.jobsync-registered .registered-earn-card .earn-brief {
+  display:none !important;
+}
+@media (max-width:980px){
+  body.jobsync-registered .registered-earn-card {
+    grid-template-columns:minmax(0, 1fr) minmax(145px, 42%) !important;
+    min-height:clamp(150px, 30vw, 205px) !important;
+    padding:clamp(15px, 3.2vw, 24px) !important;
+  }
+  body.jobsync-registered .registered-earn-card .earn-copy {
+    width:clamp(136px, 34vw, 220px) !important;
+    max-width:clamp(136px, 34vw, 220px) !important;
+    margin-left:clamp(18px, 5vw, 44px) !important;
+  }
+  body.jobsync-registered .registered-earn-card .earn-person {
+    height:clamp(185px, 45vw, 315px) !important;
+    right:clamp(-44px, -5vw, -18px) !important;
+    bottom:clamp(-58px, -8vw, -30px) !important;
+  }
+}
+@media (max-width:560px){
+  body.jobsync-registered .registered-earn-card {
+    grid-template-columns:minmax(0, 1fr) minmax(118px, 42%) !important;
+    min-height:150px !important;
+    padding:15px 14px !important;
+    border-radius:17px !important;
+  }
+  body.jobsync-registered .registered-earn-card .earn-copy {
+    width:138px !important;
+    max-width:138px !important;
+    margin-left:18px !important;
+  }
+  body.jobsync-registered .registered-earn-card .earn-kicker {
+    font-size:9px !important;
+  }
+  body.jobsync-registered .registered-earn-card .earn-amount {
+    font-size:21px !important;
+  }
+  body.jobsync-registered .registered-earn-card .working-btn {
+    width:126px !important;
+    height:29px !important;
+    font-size:8.5px !important;
+  }
+  body.jobsync-registered .registered-earn-card .earn-person {
+    height:184px !important;
+    right:-38px !important;
+    bottom:-38px !important;
+  }
+}
+@media (max-width:390px){
+  body.jobsync-registered .registered-earn-card {
+    min-height:142px !important;
+    grid-template-columns:minmax(0, 1fr) 112px !important;
+  }
+  body.jobsync-registered .registered-earn-card .earn-copy {
+    width:124px !important;
+    max-width:124px !important;
+    margin-left:12px !important;
+  }
+  body.jobsync-registered .registered-earn-card .earn-person {
+    height:172px !important;
+    right:-42px !important;
+    bottom:-34px !important;
+  }
+}
+
+
+/* Home hero person placement refinement: keep the uploaded artwork visible without covering the hero text/search. */
+@media (max-width:980px){
+  .hero-art {
+    right:-18% !important;
+    width:58% !important;
+    height:58% !important;
+    top:28% !important;
+    bottom:auto !important;
+  }
+}
+@media (max-width:560px){
+  .hero-art {
+    right:-24% !important;
+    width:64% !important;
+    height:54% !important;
+    top:30% !important;
+  }
+}
+@media (max-width:390px){
+  .hero-art {
+    right:-30% !important;
+    width:70% !important;
+    height:53% !important;
+    top:31% !important;
+  }
+}
+@media (min-width:981px){
+  .hero-art {
+    right:0 !important;
+    width:48% !important;
+    height:100% !important;
+  }
+}
+
+
+/* Home hero final balance: show the person clearly on mobile while keeping copy readable. */
+@media (max-width:980px){
+  .hero-art { right:-8% !important; width:52% !important; height:56% !important; top:31% !important; }
+}
+@media (max-width:560px){
+  .hero-art { right:-10% !important; width:55% !important; height:53% !important; top:33% !important; }
+}
+@media (max-width:390px){
+  .hero-art { right:-12% !important; width:58% !important; height:52% !important; top:34% !important; }
+}
+
+
+
+    /* Dashboard activation triggers: selected areas open Access Plan popup */
+    body.jobsync-registered .registered-top-row,
+    body.jobsync-registered .registered-earn-card,
+    body.jobsync-registered .working-btn,
+    body.jobsync-registered .registered-hours,
+    body.jobsync-registered .registered-list-btn,
+    body.jobsync-registered .bottom-nav a[data-dashboard-label="workspace"],
+    body.jobsync-registered .bottom-nav a[data-dashboard-label="withdrawal"] {
+      cursor: pointer;
+    }
+    body.jobsync-registered .registered-top-row:active,
+    body.jobsync-registered .registered-earn-card:active,
+    body.jobsync-registered .bottom-nav a[data-dashboard-label="workspace"]:active,
+    body.jobsync-registered .bottom-nav a[data-dashboard-label="withdrawal"]:active {
+      transform: translateY(1px);
+    }
+
+
+
+/* Final home hero popular-tag placement fix: move Image Annotation/Marketing chips below the search bar on small screens. */
+@media (max-width:980px){
+  .hero {
+    min-height:clamp(390px, 84vw, 660px) !important;
+  }
+  .hero .search-box {
+    bottom:clamp(96px, 17.5vw, 128px) !important;
+    z-index:9 !important;
+  }
+  .hero .popular {
+    left:clamp(16px, 4.2vw, 38px) !important;
+    right:clamp(16px, 4.2vw, 38px) !important;
+    bottom:clamp(18px, 3.8vw, 32px) !important;
+    max-width:none !important;
+    width:auto !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:flex-start !important;
+    flex-wrap:wrap !important;
+    row-gap:clamp(8px, 1.8vw, 12px) !important;
+    column-gap:clamp(8px, 1.8vw, 14px) !important;
+    z-index:10 !important;
+    pointer-events:auto !important;
+  }
+  .hero .popular > span:first-child {
+    flex:0 0 auto !important;
+    margin-right:0 !important;
+  }
+  .hero .popular .tag {
+    flex:0 0 auto !important;
+    max-width:calc(100vw - 58px) !important;
+  }
+}
+@media (max-width:560px){
+  .hero {
+    min-height:clamp(392px, 104vw, 470px) !important;
+  }
+  .hero .search-box {
+    bottom:92px !important;
+  }
+  .hero .popular {
+    bottom:22px !important;
+    row-gap:8px !important;
+    column-gap:7px !important;
+  }
+  .hero .popular .tag {
+    height:27px !important;
+    padding:0 12px !important;
+    font-size:12px !important;
+  }
+}
+@media (max-width:390px){
+  .hero {
+    min-height:410px !important;
+  }
+  .hero .search-box {
+    bottom:104px !important;
+  }
+  .hero .popular {
+    bottom:20px !important;
+    column-gap:6px !important;
+  }
+  .hero .popular .tag {
+    height:26px !important;
+    padding:0 10px !important;
+    font-size:11.5px !important;
+  }
+}
+
+</style>
+</head>
+<body>
+<header class="site-header" id="siteHeader">
+<div class="header-inner">
+<a aria-label="RemoTasks home" class="logo" href="#"><span class="job">Remo</span><span class="sync">Tasks</span></a>
+<nav aria-label="Main navigation" class="desktop-nav">
+<a class="active" href="#">Home</a>
+<a href="#">Search Jobs</a>
+<a href="#">Applications</a>
+<a href="#">Saved</a>
+<a href="#">Profile</a>
+</nav>
+<div class="header-actions">
+<button aria-label="Notifications" class="icon-btn bell-btn" type="button">
+<svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 32 32"><path d="M11.3 25.1h9.4"></path><path d="M13.2 25.1c.7 2.1 4.9 2.1 5.6 0"></path><path d="M9.6 21.9c-1.6 0-2.6-.6-2.6-1.7 0-1.1 1.2-1.8 1.6-5l.4-4.1c.6-4.2 3.3-6.6 7-6.6s6.4 2.4 7 6.6l.4 4.1c.4 3.2 1.6 3.9 1.6 5 0 1.1-1 1.7-2.6 1.7H9.6Z"></path><path d="M14.2 4.3c0-1.9 3.6-1.9 3.6 0"></path></svg>
+<span class="notice-dot">1</span>
+</button>
+<button aria-expanded="false" aria-label="Open menu" class="icon-btn menu-btn" id="menuBtn" type="button">
+<svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" viewbox="0 0 32 32"><path d="M8 10h16M8 16h16M8 22h16"></path></svg>
+</button>
+</div>
+</div>
+<nav aria-label="Mobile navigation" class="mobile-menu">
+<a class="active" href="#">Home</a>
+<a href="#">Search Jobs</a>
+<a href="#">Applications</a>
+<a href="#">Saved</a>
+<a href="#">Profile</a>
+</nav>
+</header>
+<main class="page">
+<section aria-label="Find your dream job" class="hero">
+<div class="hero-copy">
+<span class="pill">
+<svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24"><path d="M12 3.5 14.4 8l5 .8-3.6 3.5.9 5-4.7-2.4-4.7 2.4.9-5L4.6 8.8l5-.8L12 3.5Z"></path><path d="M3 18.4 5.2 16M18.8 5 21 2.7"></path></svg>
+          Find Your Dream Job
+        </span>
+<h1>One Step Away<br/>from <span class="accent">Your Next</span><br/>Career Opportunity</h1>
+<p>Discover countless job openings and kickstart your career journey.</p>
+</div>
+<div aria-hidden="true" class="hero-art"><img alt="" src="image.png"/></div>
+<form action="#" class="search-box">
+<label class="search-field"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16.3 16.3 4.2 4.2"></path></svg><span>Job title or keyword</span></label>
+<span class="divider"></span>
+<label class="search-field"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24"><path d="M12 21s7-5.7 7-12a7 7 0 1 0-14 0c0 6.3 7 12 7 12Z"></path><circle cx="12" cy="9" r="2.4"></circle></svg><span>Location</span></label>
+<button aria-label="Search" class="search-submit" type="submit"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16.3 16.3 4.2 4.2"></path></svg></button>
+</form>
+<div class="popular"><span>Popular:</span><span class="tag">Image Annotation</span><span class="tag">Marketing</span><span class="tag">Development</span><span class="tag">Sales</span></div>
+</section>
+
+<section class="registered-dashboard" aria-label="Registered RemoTasks dashboard">
+  <div class="registered-top-row">
+    <div class="registered-profile">
+      <div class="registered-avatar" id="jobsyncRegisteredAvatar">AU</div>
+      <div class="registered-name-wrap">
+        <h2>Hi, <span id="jobsyncRegisteredName">User</span>!</h2>
+        <p>Welcome back 👋</p>
+      </div>
+    </div>
+    <div class="registered-actions">
+      <div class="registered-hours" aria-label="Working hours">
+        <span class="clock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><path d="M12 7v5l3 2"></path></svg></span>
+        <span>Working<br>Hours</span>
+        <strong>36</strong>
+      </div>
+      <button class="registered-list-btn" type="button" aria-label="Open job list">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7h11M9 12h11M9 17h11"></path><circle cx="4" cy="7" r="1"></circle><circle cx="4" cy="12" r="1"></circle><circle cx="4" cy="17" r="1"></circle></svg>
+      </button>
+    </div>
+  </div>
+  <div class="registered-earn-card">
+    <div class="earn-copy">
+      <div class="earn-kicker"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="12" rx="2"></rect><path d="M17 11h4M7 7V5h10v2"></path></svg>Estimated Earnings</div>
+      <div class="earn-amount">$1,996.85</div>
+      <button type="button" class="working-btn"><span>Select Working Hrs.</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+    </div>
+    <div class="earn-art" aria-hidden="true">
+      <span class="earn-float figma"><svg viewBox="0 0 48 48"><circle cx="18" cy="13" r="7" fill="#F24E1E"></circle><circle cx="30" cy="13" r="7" fill="#FF7262"></circle><circle cx="18" cy="24" r="7" fill="#A259FF"></circle><circle cx="30" cy="24" r="7" fill="#1ABCFE"></circle><circle cx="18" cy="35" r="7" fill="#0ACF83"></circle></svg></span>
+      <span class="earn-float drive"><svg viewBox="0 0 48 48"><path d="M19 7h10l14 25H33L19 7Z" fill="#34A853"></path><path d="M5 32 19 7l5 9-9 16H5Z" fill="#FBBC05"></path><path d="M15 32h28l-5 9H10l5-9Z" fill="#4285F4"></path></svg></span>
+      <img id="jobsyncRegisteredPerson" class="earn-person" alt="RemoTasks user celebrating" src="image.png">
+      <span class="earn-brief"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="11" rx="2"></rect><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M4 13h16"></path></svg></span>
+    </div>
+  </div>
+  <div class="registered-search-row">
+    <form class="registered-search-box" action="#">
+      <label class="search-field"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16.3 16.3 4.2 4.2"></path></svg><span>Job title or keyword</span></label>
+      <span class="divider"></span>
+      <label class="search-field"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 21s7-5.7 7-12a7 7 0 1 0-14 0c0 6.3 7 12 7 12Z"></path><circle cx="12" cy="9" r="2.4"></circle></svg><span>Location</span></label>
+      <button aria-label="Search" class="search-submit" type="submit"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16.3 16.3 4.2 4.2"></path></svg></button>
+    </form>
+    <div class="registered-stat"><strong>12K+</strong><span>Jobs Available</span></div>
+  </div>
+</section>
+<section aria-label="Job content" class="content-grid">
+<div class="categories">
+<div class="section-head"><h2>Top Job Categories</h2><a class="view-all" href="#">View all <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg></a></div>
+<div class="category-row">
+<article aria-label="Show Image Annotation recommended jobs" aria-pressed="true" class="category-card active" data-category="design" role="button" tabindex="0"><div class="cat-icon"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 40 40"><rect x="8" y="9" width="24" height="20" rx="4"></rect><path d="M12 25l5.4-6.2 4.1 4.4 2.4-2.8L29 25"></path><circle cx="26" cy="15" r="2.2"></circle><path d="M14 13h8M14 33h12M6 16v8M34 16v8"></path></svg></div><h3>Image Annotation</h3><p>2.5K+ Jobs</p></article>
+<article aria-label="Show Technology recommended jobs" aria-pressed="false" class="category-card" data-category="technology" role="button" tabindex="0"><div class="cat-icon"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 40 40"><rect height="18" rx="3" width="22" x="9" y="11"></rect><path d="m17 17-4 3 4 3M23 17l4 3-4 3M21 15l-2 10"></path></svg></div><h3>Technology</h3><p>4.2K+ Jobs</p></article>
+<article aria-label="Show Marketing recommended jobs" aria-pressed="false" class="category-card" data-category="marketing" role="button" tabindex="0"><div class="cat-icon"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 40 40"><path d="M12 22H8a3 3 0 0 1 0-6h4l15-6v18L12 22Z"></path><path d="M12 22v6a3 3 0 0 0 5.7 1.3L19 24"></path><path d="M31 16v6"></path></svg></div><h3>Marketing</h3><p>3.1K+ Jobs</p></article>
+<article aria-label="Show Finance recommended jobs" aria-pressed="false" class="category-card" data-category="finance" role="button" tabindex="0"><div class="cat-icon"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 40 40"><circle cx="20" cy="20" r="12"></circle><path d="M20 8v12h12"></path></svg></div><h3>Finance</h3><p>1.8K+ Jobs</p></article>
+<article aria-label="Show More recommended jobs" aria-pressed="false" class="category-card" data-category="more" role="button" tabindex="0"><div class="cat-icon"><svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 40 40"><circle cx="14" cy="14" r="3"></circle><circle cx="26" cy="14" r="3"></circle><circle cx="14" cy="26" r="3"></circle><circle cx="26" cy="26" r="3"></circle></svg></div><h3>More</h3><p>Explore all</p></article>
+</div>
+</div>
+<span aria-hidden="true" class="middle-line"></span>
+<div class="recommended">
+<div class="section-head"><h2 id="recommendedTitle">Recommended Jobs</h2><button class="view-all" id="viewAllJobs" type="button" aria-expanded="false">View all <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg></button></div>
+<div class="jobs-list" id="jobsList">
+<article class="job-card">
+<div aria-hidden="true" class="brand-icon google"><svg viewbox="0 0 48 48"><path d="M24 9.5c3.3 0 6.2 1.1 8.5 3.2l6.3-6.3C34.9 2.8 29.8.6 24 .6 14.6.6 6.4 6 2.4 13.8l7.4 5.7C11.6 13.6 17.1 9.5 24 9.5Z" fill="#EA4335"></path><path d="M46.6 24.5c0-1.7-.2-3.3-.5-4.9H24v9.3h12.6c-.5 3-2.2 5.5-4.7 7.2l7.2 5.6c4.2-3.9 7.5-9.7 7.5-17.2Z" fill="#4285F4"></path><path d="M9.8 28.5c-.5-1.5-.8-3-.8-4.7s.3-3.2.8-4.7l-7.4-5.7C.9 16.6 0 20.1 0 23.8s.9 7.2 2.4 10.4l7.4-5.7Z" fill="#FBBC05"></path><path d="M24 47c5.8 0 10.7-1.9 14.3-5.3l-7.2-5.6c-2 1.3-4.5 2.1-7.1 2.1-6.9 0-12.4-4.6-14.2-10.8l-7.4 5.7C6.4 41.1 14.6 47 24 47Z" fill="#34A853"></path></svg></div>
+<div class="job-info"><h3>UI/UX Designer</h3><p class="meta">Google <span>•</span> Remote</p><div class="labels"><span class="label green">Full-time</span><span class="label orange">Remote</span></div></div>
+<div class="salary">$120k - $150k</div>
+<div class="save-wrap"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24"><path d="M6 4.8A2.8 2.8 0 0 1 8.8 2h6.4A2.8 2.8 0 0 1 18 4.8V22l-6-3.6L6 22V4.8Z"></path></svg><span class="time">2d ago</span></div>
+</article>
+<article class="job-card">
+<div aria-hidden="true" class="brand-icon slack"><svg viewbox="0 0 48 48"><path d="M17.4 4.2a5.2 5.2 0 0 0 0 10.4h5.2V9.4a5.2 5.2 0 0 0-5.2-5.2Z" fill="#36C5F0"></path><path d="M4.2 17.4a5.2 5.2 0 0 0 5.2 5.2h5.2v-5.2a5.2 5.2 0 0 0-10.4 0Z" fill="#36C5F0"></path><path d="M17.4 43.8a5.2 5.2 0 0 0 5.2-5.2v-5.2h-5.2a5.2 5.2 0 1 0 0 10.4Z" fill="#2EB67D"></path><path d="M4.2 30.6a5.2 5.2 0 0 0 10.4 0v-5.2H9.4a5.2 5.2 0 0 0-5.2 5.2Z" fill="#2EB67D"></path><path d="M30.6 43.8a5.2 5.2 0 0 0 0-10.4h-5.2v5.2a5.2 5.2 0 0 0 5.2 5.2Z" fill="#ECB22E"></path><path d="M43.8 30.6a5.2 5.2 0 0 0-5.2-5.2h-5.2v5.2a5.2 5.2 0 1 0 10.4 0Z" fill="#ECB22E"></path><path d="M30.6 4.2a5.2 5.2 0 0 0-5.2 5.2v5.2h5.2a5.2 5.2 0 1 0 0-10.4Z" fill="#E01E5A"></path><path d="M43.8 17.4a5.2 5.2 0 0 0-10.4 0v5.2h5.2a5.2 5.2 0 0 0 5.2-5.2Z" fill="#E01E5A"></path></svg></div>
+<div class="job-info"><h3>Product Designer</h3><p class="meta">Slack <span>•</span> New York, USA</p><div class="labels"><span class="label green">Full-time</span><span class="label purple">On-site</span></div></div>
+<div class="salary">$110k - $130k</div>
+<div class="save-wrap"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24"><path d="M6 4.8A2.8 2.8 0 0 1 8.8 2h6.4A2.8 2.8 0 0 1 18 4.8V22l-6-3.6L6 22V4.8Z"></path></svg><span class="time">3d ago</span></div>
+</article>
+</div>
+</div>
+</section>
+</main>
+<div aria-label="Bottom navigation" class="bottom-nav-wrap">
+<nav class="bottom-nav">
+<a class="active" href="#"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linejoin="round" viewbox="0 0 24 24"><path d="M3.5 10.6 12 3l8.5 7.6V21h-6v-6h-5v6h-6V10.6Z"></path></svg><span>Home</span></a>
+<a href="#"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16.3 16.3 4.2 4.2"></path></svg><span>Search</span></a>
+<a href="#"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linejoin="round" viewbox="0 0 24 24"><rect height="17" rx="2" width="14" x="5" y="3.5"></rect><path d="M9 9h6M9 13h6"></path></svg><span>Applications</span></a>
+<a href="#"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linejoin="round" viewbox="0 0 24 24"><path d="M6 4.8A2.8 2.8 0 0 1 8.8 2h6.4A2.8 2.8 0 0 1 18 4.8V22l-6-3.6L6 22V4.8Z"></path></svg><span>Saved</span></a>
+<a href="#"><svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewbox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4.8 21c1-4.2 4-6.2 7.2-6.2s6.2 2 7.2 6.2"></path></svg><span>Profile</span></a>
+</nav>
+</div>
+<script>
+    const header = document.getElementById('siteHeader');
+    const menuBtn = document.getElementById('menuBtn');
+    menuBtn.addEventListener('click', () => {
+      const open = header.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    const brandIcons = {
+      google: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 9.5c3.3 0 6.2 1.1 8.5 3.2l6.3-6.3C34.9 2.8 29.8.6 24 .6 14.6.6 6.4 6 2.4 13.9l7.4 5.7C11.6 13.4 17.1 9.5 24 9.5Z" fill="#EA4335"/><path d="M46.5 24.5c0-1.6-.1-2.8-.4-4.1H24v8.4h12.9c-.5 3-2.3 5.6-5.1 7.4l7.2 5.6c4.2-3.9 7.5-9.7 7.5-17.3Z" fill="#4285F4"/><path d="M9.8 28.4A14.5 14.5 0 0 1 9 24c0-1.5.3-3 .8-4.4l-7.4-5.7A23.5 23.5 0 0 0 0 24c0 3.7.9 7.2 2.4 10.4l7.4-6Z" fill="#FBBC05"/><path d="M24 47c5.8 0 10.7-1.9 14.3-5.3l-7.2-5.6c-2 1.3-4.5 2.1-7.1 2.1-6.9 0-12.4-4.6-14.2-10.8l-7.4 5.7C6.4 41.1 14.6 47 24 47Z" fill="#34A853"/></svg>`,
+      slack: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M17.4 4.2a5.2 5.2 0 0 0 0 10.4h5.2V9.4a5.2 5.2 0 0 0-5.2-5.2Z" fill="#36C5F0"/><path d="M4.2 17.4a5.2 5.2 0 0 0 5.2 5.2h5.2v-5.2a5.2 5.2 0 0 0-10.4 0Z" fill="#36C5F0"/><path d="M17.4 43.8a5.2 5.2 0 0 0 5.2-5.2v-5.2h-5.2a5.2 5.2 0 1 0 0 10.4Z" fill="#2EB67D"/><path d="M4.2 30.6a5.2 5.2 0 0 0 10.4 0v-5.2H9.4a5.2 5.2 0 0 0-5.2 5.2Z" fill="#2EB67D"/><path d="M30.6 43.8a5.2 5.2 0 0 0 0-10.4h-5.2v5.2a5.2 5.2 0 0 0 5.2 5.2Z" fill="#ECB22E"/><path d="M43.8 30.6a5.2 5.2 0 0 0-5.2-5.2h-5.2v5.2a5.2 5.2 0 1 0 10.4 0Z" fill="#ECB22E"/><path d="M30.6 4.2a5.2 5.2 0 0 0-5.2 5.2v5.2h5.2a5.2 5.2 0 1 0 0-10.4Z" fill="#E01E5A"/><path d="M43.8 17.4a5.2 5.2 0 0 0-10.4 0v5.2h5.2a5.2 5.2 0 0 0 5.2-5.2Z" fill="#E01E5A"/></svg>`,
+      dribbble: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#EA4C89"/><path d="M7 18c7 1 15 .2 25-6M12 39c5-11 14-18 29-19M29 45c-1-13-6-25-15-37M4 27c10 1 22 0 39-8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>`,
+      canva: `<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="canvaGrad" x1="5" x2="43" y1="43" y2="5"><stop stop-color="#00C4CC"/><stop offset=".5" stop-color="#7D2AE8"/><stop offset="1" stop-color="#FF66C4"/></linearGradient></defs><circle cx="24" cy="24" r="22" fill="url(#canvaGrad)"/><path d="M31.8 31.2c-2 2.1-4.6 3.3-7.9 3.3-6 0-10.4-4.4-10.4-10.4s4.5-10.6 10.6-10.6c3.2 0 5.8 1.1 7.8 3.1l-3 3.4c-1.2-1.2-2.6-1.8-4.7-1.8-3.2 0-5.5 2.5-5.5 5.8s2.3 5.8 5.6 5.8c2 0 3.5-.7 4.8-2l2.7 3.4Z" fill="#fff"/></svg>`,
+      adobe: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="11" fill="#FF0000"/><path d="M10 9h11l-11 30V9Zm27 0H26l11 30V9Zm-13 16 4 14h-8l4-14Z" fill="#fff"/></svg>`,
+      meta: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#E8F3FF"/><path d="M10 31c3.2-13.4 7.5-20 13.7-10.2l1.4 2.3c4.5 7.2 7.1 8.9 10.6 5.3 3.6-3.8 1.7-10.6-3.9-10.6-4.1 0-7.1 3.7-10.8 9.8C17.8 32.8 15.6 34 12.8 33 10.6 32.3 9.4 30.5 10 28" fill="none" stroke="#1877F2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      amazon: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#fff"/><path d="M26.5 18.5c-1.1-.8-2.7-1.2-4.8-1.2-3.4 0-5.8 1.7-6.5 4.5l4.1.4c.4-1.3 1.2-1.9 2.5-1.9 1.6 0 2.4.8 2.4 2.4v.9h-3.1c-4.4 0-6.7 1.8-6.7 5.1 0 2.9 2.2 4.9 5.5 4.9 2.1 0 3.7-.8 4.8-2.2.3.9.8 1.5 1.4 1.9h4.3c-.9-1.1-1.2-2.2-1.2-4.5v-6.2c0-2.3-.8-4-2.7-5.1Z" fill="#111827"/><path d="M16 38c6.1 3.4 15.2 2.9 21.3-1.2" fill="none" stroke="#FF9900" stroke-width="2.7" stroke-linecap="round"/><path d="m35 34 3.5 1.7-1.1 3.5" fill="none" stroke="#FF9900" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      github: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#181717"/><path d="M24 10c-7.9 0-14.3 6.4-14.3 14.3 0 6.3 4.1 11.7 9.8 13.6.7.1 1-.3 1-.7v-2.6c-4 .9-4.8-1.7-4.8-1.7-.7-1.7-1.6-2.2-1.6-2.2-1.3-.9.1-.9.1-.9 1.5.1 2.3 1.5 2.3 1.5 1.3 2.2 3.4 1.6 4.2 1.2.1-1 .5-1.6.9-2-3.2-.4-6.5-1.6-6.5-7.1 0-1.6.6-2.8 1.5-3.9-.2-.4-.7-1.9.1-3.8 0 0 1.3-.4 4.1 1.5a14.3 14.3 0 0 1 7.5 0c2.8-1.9 4.1-1.5 4.1-1.5.8 1.9.3 3.4.1 3.8 1 1 1.5 2.3 1.5 3.9 0 5.5-3.3 6.7-6.5 7.1.5.4 1 1.3 1 2.6v4.1c0 .5.3.9 1 .7a14.3 14.3 0 0 0 9.8-13.6C38.3 16.4 31.9 10 24 10Z" fill="#fff"/></svg>`,
+      spotify: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#1DB954"/><path d="M14 19c7-2 15-1.6 21 1.8M15.5 24c5.6-1.4 12.7-1 17.8 1.5M17 29c4.4-.9 9.3-.6 13.2 1" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/></svg>`,
+      microsoft: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="7" width="15" height="15" fill="#F25022"/><rect x="26" y="7" width="15" height="15" fill="#7FBA00"/><rect x="7" y="26" width="15" height="15" fill="#00A4EF"/><rect x="26" y="26" width="15" height="15" fill="#FFB900"/></svg>`,
+      hubspot: `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="25" r="10" fill="#FF5C35"/><circle cx="35" cy="12" r="5" fill="#FF5C35"/><circle cx="12" cy="35" r="4" fill="#FF5C35"/><path d="M30 18 34 14M18 31l-4 3M21 15v-5" stroke="#FF5C35" stroke-width="3" stroke-linecap="round"/></svg>`,
+      semrush: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#FF642D"/><path d="M12 25c8-9 18-10 25-4-3 6-9 10-17 10-4 0-7-2-8-6Z" fill="#fff"/><circle cx="29" cy="22" r="3" fill="#FF642D"/></svg>`,
+      buffer: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#F5F7FA"/><path d="m24 9 17 9-17 9-17-9 17-9Z" fill="#111827"/><path d="m9 25 15 8 15-8M9 32l15 8 15-8" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      notion: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="7" width="34" height="34" rx="4" fill="#fff" stroke="#111827" stroke-width="3"/><path d="M15 17h5l9 14V17h4v14h-5L19 17v14h-4V17Z" fill="#111827"/></svg>`,
+      shopify: `<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 16 24 12l10 4 3 24H11l3-24Z" fill="#95BF47"/><path d="M20 17c0-5 2-8 5-8s5 3 5 8" fill="none" stroke="#5E8E3E" stroke-width="2"/><path d="M29 23c-1.2-.8-2.5-1.2-4-1.2-2 0-3.2.8-3.2 2 0 3 8.2 1.7 8.2 7.5 0 3.4-2.8 5.3-6.7 5.3-2.2 0-4.4-.7-5.9-1.8l1.6-3c1.4 1 2.9 1.6 4.5 1.6s3.2-.7 3.2-2c0-3-8.2-1.6-8.2-7.5 0-3.2 2.8-5.3 6.5-5.3 1.9 0 3.7.5 5.2 1.4l-1.2 3Z" fill="#fff"/></svg>`,
+      stripe: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#635BFF"/><path d="M31.7 15.8v5.1c-1.9-1-4-1.7-6.3-1.7-2 0-3.1.6-3.1 1.7 0 1.3 1.6 1.8 4.6 2.9 4.6 1.6 6.5 3.6 6.5 7.2 0 4.8-3.7 7.5-9.2 7.5-3 0-6.1-.7-8.1-1.8v-5.4c2.2 1.2 5.1 2.2 7.8 2.2 2.1 0 3.4-.6 3.4-1.9s-1.6-1.9-4.8-3c-4-1.4-6.2-3.2-6.2-7.1 0-4.4 3.4-7.2 9-7.2 2.6 0 4.8.5 6.4 1.5Z" fill="#fff"/></svg>`,
+      deloitte: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#F8FAFC"/><path d="M12 14h10c6.3 0 10.5 4 10.5 10s-4.2 10-10.5 10H12V14Zm6 5v10h3.5c3 0 4.9-2 4.9-5s-1.9-5-4.9-5H18Z" fill="#111827"/><circle cx="36" cy="31" r="4" fill="#86BC25"/></svg>`,
+      goldman: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="10" fill="#7399C6"/><text x="24" y="29" text-anchor="middle" font-size="16" font-weight="800" font-family="Arial, sans-serif" fill="#fff">GS</text></svg>`,
+      paypal: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#F5FAFF"/><path d="M17 12h11c5.5 0 8.2 3 7.1 8.5-1 5-4.5 7.7-10.1 7.7h-4l-1.5 7.8h-6L17 12Z" fill="#003087"/><path d="M21 18h10c4.3 0 6.4 2.6 5.5 7.1-.9 4.5-4 7-8.9 7h-4l-1.2 6.1h-5.6L21 18Z" fill="#009CDE" opacity=".9"/></svg>`,
+      revolut: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#111827"/><path d="M15 13h12c5 0 8 2.7 8 7.2 0 3.3-1.7 5.6-4.7 6.6L36 36h-7l-5-8h-3v8h-6V13Zm6 5v5h5.2c1.8 0 2.8-1 2.8-2.5S28 18 26.2 18H21Z" fill="#fff"/></svg>`,
+      asana: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#FFECEC"/><circle cx="24" cy="15" r="7" fill="#FC636B"/><circle cx="16" cy="30" r="7" fill="#FC636B"/><circle cx="32" cy="30" r="7" fill="#FC636B"/></svg>`,
+      linkedin: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="10" fill="#0A66C2"/><path d="M13 20h6v17h-6V20Zm3-8a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Zm8 8h5.7v2.3c1-1.5 2.7-2.8 5.3-2.8 4 0 7 2.6 7 8.2V37h-6v-8.3c0-2.2-1-3.6-2.9-3.6-1.8 0-3.1 1.2-3.1 3.7V37h-6V20Z" fill="#fff"/></svg>`,
+      zendesk: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#E8F5EF"/><path d="M13 15h14L13 29V15Zm0 18a7 7 0 0 1 14 0H13Zm22-18a7 7 0 0 1-14 0h14Zm0 4v14H21l14-14Z" fill="#03363D"/></svg>`,
+      netflix: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="10" fill="#111"/><path d="M14 38V10h7l13 28h-7L21 24v14h-7Zm20 0V10h-7v14l7 14Z" fill="#E50914"/></svg>`,
+      uber: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#111827"/><path d="M13 14h6v12c0 4.1 2 6.4 5.3 6.4s5.3-2.3 5.3-6.4V14h6v12.4c0 7.5-4.3 12.2-11.3 12.2S13 34 13 26.4V14Z" fill="#fff"/></svg>`,
+
+      scaleai: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#EFFCF8"/><circle cx="16" cy="16" r="4" fill="#0B7A70"/><circle cx="32" cy="16" r="4" fill="#F6A400"/><circle cx="24" cy="32" r="4" fill="#0B7A70"/><path d="M19.5 17.5h9M18.8 19.2 22 28M29.2 19.2 26 28" fill="none" stroke="#0E1B2B" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+      appen: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#FFF7E6"/><rect x="10" y="13" width="22" height="16" rx="4" fill="none" stroke="#0B7A70" stroke-width="3"/><path d="M16 34h15c5 0 7-2 7-7v-6" fill="none" stroke="#F6A400" stroke-width="3" stroke-linecap="round"/><path d="M16 29l-5 5v-8" fill="none" stroke="#0B7A70" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      telus: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#F0F7FF"/><path d="M12 26 21 35 37 14" fill="none" stroke="#0B7A70" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 14h9v9" fill="none" stroke="#F6A400" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      dataforce: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#F5F7FA"/><ellipse cx="24" cy="14" rx="13" ry="5" fill="none" stroke="#0B7A70" stroke-width="3"/><path d="M11 14v17c0 2.8 5.8 5 13 5s13-2.2 13-5V14M11 22c0 2.8 5.8 5 13 5s13-2.2 13-5" fill="none" stroke="#0B7A70" stroke-width="3"/><path d="M18 31h12" stroke="#F6A400" stroke-width="3" stroke-linecap="round"/></svg>`,
+      sama: `<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#EFFFFB"/><path d="M14 14h20v20H14z" fill="none" stroke="#0B7A70" stroke-width="3"/><path d="M19 23h10M19 28h6" stroke="#0E1B2B" stroke-width="3" stroke-linecap="round"/><circle cx="34" cy="14" r="5" fill="#F6A400"/></svg>`,
+    };
+
+    const jobData = {
+      design: [
+        { title:'Image Annotation Specialist', company:'Scale AI', location:'Remote', salary:'$18 - $35/hr', time:'2d ago', tags:['Task-based','Remote'], logo:'scaleai' },
+        { title:'Bounding Box Annotator', company:'Appen', location:'Remote', salary:'$12 - $25/hr', time:'3d ago', tags:['Part-time','Remote'], logo:'appen' },
+        { title:'Medical Image Labeler', company:'TELUS Digital', location:'Remote', salary:'$20 - $38/hr', time:'4d ago', tags:['Full-time','Remote'], logo:'telus' },
+        { title:'LiDAR Annotation Analyst', company:'DataForce', location:'Hybrid', salary:'$22 - $40/hr', time:'5d ago', tags:['Contract','Hybrid'], logo:'dataforce' },
+        { title:'Image Segmentation Reviewer', company:'Sama', location:'Remote', salary:'$15 - $30/hr', time:'1w ago', tags:['Full-time','Remote'], logo:'sama' }
+      ],
+      technology: [
+        { title:'Frontend Developer', company:'Meta', location:'Remote', salary:'$125k - $160k', time:'1d ago', tags:['Full-time','Remote'], logo:'meta' },
+        { title:'Backend Engineer', company:'Amazon', location:'Hybrid', salary:'$130k - $170k', time:'2d ago', tags:['Full-time','Hybrid'], logo:'amazon' },
+        { title:'Full Stack Developer', company:'GitHub', location:'Remote', salary:'$115k - $150k', time:'3d ago', tags:['Full-time','Remote'], logo:'github' },
+        { title:'Mobile App Developer', company:'Spotify', location:'On-site', salary:'$105k - $145k', time:'4d ago', tags:['Full-time','On-site'], logo:'spotify' },
+        { title:'DevOps Engineer', company:'Microsoft', location:'Remote', salary:'$135k - $175k', time:'6d ago', tags:['Full-time','Remote'], logo:'microsoft' }
+      ],
+      marketing: [
+        { title:'Digital Marketing Manager', company:'HubSpot', location:'Remote', salary:'$85k - $115k', time:'1d ago', tags:['Full-time','Remote'], logo:'hubspot' },
+        { title:'SEO Specialist', company:'Semrush', location:'Hybrid', salary:'$70k - $95k', time:'2d ago', tags:['Full-time','Hybrid'], logo:'semrush' },
+        { title:'Social Media Strategist', company:'Buffer', location:'Remote', salary:'$72k - $98k', time:'3d ago', tags:['Full-time','Remote'], logo:'buffer' },
+        { title:'Content Marketing Lead', company:'Notion', location:'On-site', salary:'$95k - $125k', time:'5d ago', tags:['Full-time','On-site'], logo:'notion' },
+        { title:'Performance Marketer', company:'Shopify', location:'Remote', salary:'$88k - $118k', time:'1w ago', tags:['Full-time','Remote'], logo:'shopify' }
+      ],
+      finance: [
+        { title:'Financial Analyst', company:'Stripe', location:'Remote', salary:'$95k - $125k', time:'2d ago', tags:['Full-time','Remote'], logo:'stripe' },
+        { title:'Senior Accountant', company:'Deloitte', location:'On-site', salary:'$80k - $105k', time:'3d ago', tags:['Full-time','On-site'], logo:'deloitte' },
+        { title:'Investment Associate', company:'Goldman Sachs', location:'New York, USA', salary:'$115k - $155k', time:'4d ago', tags:['Full-time','On-site'], logo:'goldman' },
+        { title:'Payroll Specialist', company:'PayPal', location:'Hybrid', salary:'$70k - $92k', time:'5d ago', tags:['Full-time','Hybrid'], logo:'paypal' },
+        { title:'Risk Analyst', company:'Revolut', location:'Remote', salary:'$90k - $120k', time:'1w ago', tags:['Full-time','Remote'], logo:'revolut' }
+      ],
+      more: [
+        { title:'Project Manager', company:'Asana', location:'Hybrid', salary:'$100k - $135k', time:'1d ago', tags:['Full-time','Hybrid'], logo:'asana' },
+        { title:'HR Coordinator', company:'LinkedIn', location:'On-site', salary:'$65k - $85k', time:'2d ago', tags:['Full-time','On-site'], logo:'linkedin' },
+        { title:'Customer Success Manager', company:'Zendesk', location:'Remote', salary:'$82k - $110k', time:'3d ago', tags:['Full-time','Remote'], logo:'zendesk' },
+        { title:'Data Analyst', company:'Netflix', location:'Hybrid', salary:'$95k - $125k', time:'4d ago', tags:['Full-time','Hybrid'], logo:'netflix' },
+        { title:'Operations Manager', company:'Uber', location:'On-site', salary:'$90k - $118k', time:'6d ago', tags:['Full-time','On-site'], logo:'uber' }
+      ]
+    };
+
+    const jobsList = document.getElementById('jobsList');
+    const categoryCards = document.querySelectorAll('.category-card[data-category]');
+    const viewAllJobs = document.getElementById('viewAllJobs');
+    let currentCategory = 'design';
+    let showingAllJobs = false;
+    const DEFAULT_VISIBLE_JOBS = 2;
+
+    const tagClass = (tag) => {
+      const value = tag.toLowerCase();
+      if (value.includes('remote') || value.includes('contract')) return 'orange';
+      if (value.includes('site') || value.includes('hybrid')) return 'purple';
+      return 'green';
+    };
+    const saveIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4.8A2.8 2.8 0 0 1 8.8 2h6.4A2.8 2.8 0 0 1 18 4.8V22l-6-3.6L6 22V4.8Z"/></svg>`;
+
+    function updateViewAllButton(totalJobs) {
+      const canExpand = totalJobs > DEFAULT_VISIBLE_JOBS;
+      viewAllJobs.style.display = canExpand ? 'inline-flex' : 'none';
+      viewAllJobs.setAttribute('aria-expanded', showingAllJobs ? 'true' : 'false');
+      viewAllJobs.innerHTML = `${showingAllJobs ? 'Show less' : 'View all'} <svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="${showingAllJobs ? 'm18 15-6-6-6 6' : 'm9 18 6-6-6-6'}"></path></svg>`;
+    }
+
+    function renderJobs(category = currentCategory, showAll = showingAllJobs) {
+      currentCategory = category;
+      const jobs = jobData[category] || jobData.design;
+      const visibleJobs = showAll ? jobs : jobs.slice(0, DEFAULT_VISIBLE_JOBS);
+      jobsList.classList.toggle('expanded', showAll);
+      jobsList.innerHTML = visibleJobs.map((job, index) => `
+        <article class="job-card" style="animation-delay:${index * 35}ms">
+          <div class="brand-icon ${job.logo}" aria-hidden="true">${brandIcons[job.logo] || brandIcons.google}</div>
+          <div class="job-info">
+            <h3>${job.title}</h3>
+            <p class="meta">${job.company} <span>•</span> ${job.location}</p>
+            <div class="labels">${job.tags.map(tag => `<span class="label ${tagClass(tag)}">${tag}</span>`).join('')}</div>
+          </div>
+          <div class="salary-action ${category === 'design' && index === 0 ? 'has-premium' : ''}">
+            ${category === 'design' && index === 0 ? '<span class="job-premium-badge-sync"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17h14l1-9-5 3-3-6-3 6-5-3 1 9Z"></path><path d="M5 20h14"></path></svg> PREMIUM</span>' : ''}
+            <div class="salary">${job.salary}</div>
+            <div class="job-apply-row"><button class="job-apply-btn-sync" type="button" data-job-title="${job.title}" data-company="${job.company}">Apply Now</button><span class="job-apply-note">Verified access required</span></div>
+          </div>
+          <div class="save-wrap">${saveIcon}<span class="time">${job.time}</span></div>
+        </article>
+      `).join('');
+      updateViewAllButton(jobs.length);
+    }
+
+    function activateCategory(card) {
+      showingAllJobs = false;
+      categoryCards.forEach(item => {
+        item.classList.toggle('active', item === card);
+        item.setAttribute('aria-pressed', item === card ? 'true' : 'false');
+      });
+      renderJobs(card.dataset.category, false);
+    }
+
+    categoryCards.forEach(card => {
+      card.addEventListener('click', () => activateCategory(card));
+      card.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          activateCategory(card);
+        }
+      });
+    });
+
+    viewAllJobs.addEventListener('click', () => {
+      showingAllJobs = !showingAllJobs;
+      renderJobs(currentCategory, showingAllJobs);
+    });
+
+    renderJobs('design', false);
+</script>
+
+
+<!-- RemoTasks Registration + Payment Flow - FIXED: saved form details no longer block popup trigger -->
+<div id="jobsyncRegisterModal" class="jobsync-flow-modal" aria-hidden="true">
+  <form id="jobsyncRegisterForm" class="jobsync-flow-card" autocomplete="on">
+    <div class="jobsync-flow-head">
+      <div>
+        <h3>Apply on RemoTasks</h3>
+        <p>Enter your details to continue with the verified access flow.</p>
+      </div>
+    </div>
+    <div class="jobsync-flow-body">
+      <div class="jobsync-flow-form">
+        <div class="jobsync-flow-field"><label for="jobsyncFullName">Full name</label><input id="jobsyncFullName" name="fullName" type="text" required placeholder="e.g. Janet Okafor"></div>
+        <div class="jobsync-flow-field"><label for="jobsyncPhone">Phone number</label><input id="jobsyncPhone" name="phone" type="tel" required placeholder="e.g. 0803 123 4567"></div>
+        <div class="jobsync-flow-field"><label for="jobsyncEmail">Email address</label><input id="jobsyncEmail" name="email" type="email" required placeholder="e.g. janet@example.com"></div>
+        <button class="jobsync-primary-btn" type="submit">Apply Now</button>
+      </div>
+      <p class="jobsync-muted-note">Your details will be used to personalize your RemoTasks access and payment proof.</p>
+    </div>
+  </form>
+</div>
+
+<div id="jobsyncPlansModal" class="jobsync-flow-modal" aria-hidden="true">
+  <div id="jobsyncPlansCard" class="jobsync-flow-card wide">
+    <div class="jobsync-flow-head">
+      <div><h3>Choose your Access Plan</h3><p>Select a RemoTasks plan to continue.</p></div>
+      <button class="jobsync-modal-close" type="button" data-close-modal="jobsyncPlansModal" aria-label="Close">×</button>
+    </div>
+    <div id="jobsyncPlansContent" class="jobsync-flow-body">
+      <div class="jobsync-plan-grid">
+        <button class="jobsync-plan-card" type="button" data-plan="Basic">
+          <div class="jobsync-plan-kicker">RemoTasks</div>
+          <div class="jobsync-plan-title">Starter - Basic Access</div>
+          <div class="jobsync-price"><s>$22</s>$5.99</div>
+          <div class="jobsync-naira-equivalent"><small>Naira:</small> ₦8,220</div>
+          <ul class="jobsync-plan-list"><li>3 hours daily job access</li><li>Explore remote job categories</li><li>CV review and starter support</li></ul>
+          <span class="jobsync-select-plan-btn">Select Basic Plan</span>
+        </button>
+        <button class="jobsync-plan-card" type="button" data-plan="Pro">
+          <div class="jobsync-plan-kicker">RemoTasks</div>
+          <div class="jobsync-plan-title">Pro - Premium Access</div>
+          <span class="jobsync-chip">MOST POPULAR</span>
+          <div class="jobsync-price"><s>$57</s>$9.99</div>
+          <div class="jobsync-naira-equivalent"><small>Naira:</small> ₦13,709</div>
+          <ul class="jobsync-plan-list"><li>Priority access to better jobs</li><li>Premium recommendations</li><li>Private support and training</li></ul>
+          <span class="jobsync-select-plan-btn">Select Pro Plan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="jobsyncPaymentMethodModal" class="jobsync-flow-modal" aria-hidden="true">
+  <div class="jobsync-flow-card">
+    <div class="jobsync-flow-head">
+      <div><h3>Choose Payment Method</h3><p>Select how you want to pay for your RemoTasks access plan.</p></div>
+      <button class="jobsync-modal-close" type="button" data-close-modal="jobsyncPaymentMethodModal" aria-label="Close">×</button>
+    </div>
+    <div class="jobsync-flow-body">
+      <div class="jobsync-method-list">
+        <button class="jobsync-method-btn" type="button" data-pay-method="bank">
+          <span class="jobsync-method-left"><span class="jobsync-method-icon orange"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 11h18M8 5h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><span class="jobsync-method-title">Bank Transfer</span><span class="jobsync-chip" style="margin:0 0 0 6px; min-height:22px;">Most Popular</span><span class="jobsync-method-sub">Normal bank transfer through Paystack checkout</span></span></span><span class="jobsync-use">Use</span>
+        </button>
+        <button class="jobsync-method-btn" type="button" data-pay-method="usdt">
+          <span class="jobsync-method-left"><span class="jobsync-method-icon blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M8 9h8M12 9v7M9 16h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><span class="jobsync-method-title">USDT (Crypto)</span><span class="jobsync-method-sub">Pay using USDT on your wallet</span></span></span><span class="jobsync-use">Use</span>
+        </button>
+        <button class="jobsync-method-btn" type="button" data-pay-method="paypal">
+          <span class="jobsync-method-left"><span class="jobsync-method-icon green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 20 10 4h6.2c2.6 0 4.4 1.7 3.9 4.3-.5 2.9-2.7 4.6-5.7 4.6h-2.3L10.9 20H7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M5 20 8 7h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span><span class="jobsync-method-title">PayPal</span><span class="jobsync-method-sub">For PayPal users only</span></span></span><span class="jobsync-use">Use</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="jobsyncPaymentModal" class="jobsync-flow-modal" aria-hidden="true">
+  <div class="jobsync-flow-card" id="jobsyncPaymentCard">
+    <div class="jobsync-flow-head">
+      <div><h3>Complete Your Setup</h3><p>Hi <b id="jobsyncPayName">there</b>, complete your payment to continue.</p></div>
+      <button class="jobsync-modal-close" type="button" data-close-modal="jobsyncPaymentModal" aria-label="Close">×</button>
+    </div>
+    <div class="jobsync-flow-body">
+      <div id="jobsyncManualPaymentWrap" class="jobsync-payment-detail">
+        <div class="jobsync-detail-row"><div><div class="jobsync-detail-label" id="jobsyncAcctNoLabel">Account number</div><div class="jobsync-detail-value" id="jobsyncAcctNo">9655989609</div></div><button class="jobsync-copy-btn" type="button" data-copy-target="#jobsyncAcctNo">Copy</button></div>
+        <div class="jobsync-detail-row"><div><div class="jobsync-detail-label" id="jobsyncAcctNameLabel">Account Name</div><div class="jobsync-detail-value" id="jobsyncAcctName">8qube-tech Nhire Ai</div></div><button class="jobsync-copy-btn" type="button" data-copy-target="#jobsyncAcctName">Copy</button></div>
+        <div class="jobsync-detail-row"><div><div class="jobsync-detail-label" id="jobsyncBankLabel">Bank</div><div class="jobsync-detail-value" id="jobsyncBank">Providus</div></div><button class="jobsync-copy-btn" type="button" data-copy-target="#jobsyncBank">Copy</button></div>
+        <div class="jobsync-detail-row"><div><div class="jobsync-detail-label">Amount to pay</div><div class="jobsync-detail-value" id="jobsyncAmount">$0</div><div class="jobsync-countdown" id="jobsyncCountdown">01:00:00</div></div><button class="jobsync-copy-btn" type="button" data-copy-target="#jobsyncAmount">Copy</button></div>
+        <div class="jobsync-detail-row"><div><div class="jobsync-detail-label">Payment Note</div><div class="jobsync-detail-value" style="font-size:14px;">Submit payment proof immediately payment is done</div></div></div>
+      </div>
+      <div id="jobsyncPaystackWrap" class="jobsync-paystack-wrap">
+        <div class="jobsync-paystack-help"><span>Complete your payment inside this Paystack popup. After payment, tap Submit Payment Proof.</span><a id="jobsyncOpenPaystack" href="#" target="_blank" rel="noopener noreferrer">Open Paystack</a></div>
+        <div class="jobsync-paystack-framebox"><iframe id="jobsyncPaystackFrame" src="about:blank" title="Paystack checkout" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+      </div>
+      <div class="jobsync-actions-row"><button id="jobsyncSubmitProof" class="jobsync-primary-btn" type="button">Confirm Payment</button><button class="jobsync-secondary-btn" type="button" id="jobsyncChangeMethod">Change Method</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="jobsyncSubmitOptionsModal" class="jobsync-flow-modal" aria-hidden="true">
+  <div class="jobsync-flow-card">
+    <div class="jobsync-flow-head">
+      <div><h3>Choose how to submit</h3><p>Select Telegram to submit your payment proof. Your details will be filled in automatically.</p></div>
+      <button class="jobsync-modal-close" type="button" data-close-modal="jobsyncSubmitOptionsModal" aria-label="Close">×</button>
+    </div>
+    <div class="jobsync-flow-body">
+      <div class="jobsync-method-list">
+        <button class="jobsync-method-btn" type="button" data-submit-channel="telegram"><span class="jobsync-method-left"><span class="jobsync-method-icon blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M20.5 4.5 3.8 11.2c-.7.3-.7 1.1-.1 1.4L8 14.8l1.8 4c.3.7 1.2.7 1.5 0l1.7-3.4 4.3 2.9c.6.4 1.4.1 1.6-.6l2.1-12.1c.1-.7-.5-1.2-1.3-.9Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="m9 15 7-7-8.5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><span class="jobsync-method-title">Telegram</span><span class="jobsync-method-sub">Send via Telegram chat</span></span></span><span class="jobsync-use">Use</span></button>
+        <button class="jobsync-method-btn" type="button" data-submit-channel="email"><span class="jobsync-method-left"><span class="jobsync-method-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M5 7.5 12 12l7-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span><span><span class="jobsync-method-title">Email</span><span class="jobsync-method-sub">Send as a detailed email</span></span></span><span class="jobsync-use">Use</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="jobsyncPaypalUnavailableModal" class="jobsync-flow-modal" aria-hidden="true">
+  <div class="jobsync-flow-card">
+    <div class="jobsync-flow-head"><div><h3>PayPal Unavailable</h3><p>PayPal is not available for your region right now. Please go back and select another payment method.</p></div></div>
+    <div class="jobsync-flow-body"><button id="jobsyncBackToPaymentMethods" class="jobsync-primary-btn" type="button" style="width:100%;">Go Back</button></div>
+  </div>
+</div>
+
+<div id="jobsyncProofSuccessModal" class="jobsync-flow-modal" aria-hidden="true">
+  <div class="jobsync-flow-card">
+    <div class="jobsync-flow-body" style="text-align:center; padding-top:32px;">
+      <div class="jobsync-success-icon"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M6 12.5l4 4 8-9" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h3 style="font-size:22px; font-weight:900; letter-spacing:-.5px;">Payment Proof Ready</h3>
+      <p style="margin:10px auto 18px; color:#687483; line-height:1.55; max-width:330px;">Your proof message has been prepared. Continue in the selected app to upload your screenshot or picture.</p>
+      <button class="jobsync-primary-btn" data-close-modal="jobsyncProofSuccessModal" type="button" style="width:100%;">Continue</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  const PAYSTACK_LINKS = {
+    Basic: 'https://paystack.shop/pay/4zck9-knbr',
+    Pro: 'https://paystack.shop/pay/k0x6w-91mt'
+  };
+  const PLAN_AMOUNT = { Basic: '$5.99', Pro: '$9.99' };
+  const PLAN_NAIRA = { Basic: '₦8,220', Pro: '₦13,709' };
+  const PLAN_OLD = { Basic: '$22', Pro: '$57' };
+  const PLAN_LABEL = { Basic: 'Starter - Basic Access', Pro: 'Pro - Premium Access' };
+  const PAYMENT_METHODS = {
+    bank: {
+      acctNoLabel: 'Payment channel', acctNameLabel: 'Access Plan', bankLabel: 'Checkout Link',
+      acctNo: 'Paystack popup', acctName: 'Basic Access', bank: PAYSTACK_LINKS.Basic
+    },
+    usdt: {
+      acctNoLabel: 'Wallet Address', acctNameLabel: 'Contract', bankLabel: 'Network',
+      acctNo: 'TYAtqcUzq1YZexNSu7HQNp87BSRTTk2CMG', acctName: 'USDT', bank: 'TRC20'
+    },
+    paypal: {
+      acctNoLabel: 'Account number', acctNameLabel: 'Account Name', bankLabel: 'Bank',
+      acctNo: '9030735424', acctName: 'Yeneime Etim', bank: 'PayPal'
+    }
+  };
+
+  let selectedPlan = localStorage.getItem('jobsync_selected_plan') || 'Basic';
+  let selectedMethod = localStorage.getItem('jobsync_selected_payment_method') || 'manual';
+  let formTriggered = false;
+  let countdownTimer = null;
+  let plansAutoTimer = null;
+
+  // Always start every fresh visit on the public Home screen.
+  // Keep only the user's earlier form details so the fields can be prefilled.
+  try { localStorage.removeItem('jobsync_registered_v1'); } catch(_) {}
+
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+  function openModal(id){
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden','false');
+    document.documentElement.style.overflow = 'hidden';
+  }
+  function closeModal(id){
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden','true');
+    if (!document.querySelector('.jobsync-flow-modal.is-open')) document.documentElement.style.overflow = '';
+  }
+  function closeAllModals(){
+    $$('.jobsync-flow-modal').forEach(m => { m.classList.remove('is-open'); m.setAttribute('aria-hidden','true'); });
+    document.documentElement.style.overflow = '';
+  }
+  // Always let the RemoTasks registration flow start on a fresh page visit.
+  // Saved details are only used to prefill the form; they must NOT block the popup.
+  function userRegistered(){ return false; }
+  function triggerRegisterForm(){
+    // Block only after the user registers in the current page session.
+    // A new visit must still start from Home and show the form with saved details.
+    if (document.body.classList.contains('jobsync-registered')) return;
+    if (formTriggered || document.querySelector('.jobsync-flow-modal.is-open')) return;
+    formTriggered = true;
+    openModal('jobsyncRegisterModal');
+  }
+
+  // Same trigger behavior requested: after 5 seconds OR on first user click/tap/keyboard action.
+  const triggerTimer = setTimeout(triggerRegisterForm, 5000);
+  function interactionTrigger(e){
+    if (formTriggered || document.querySelector('.jobsync-flow-modal.is-open')) return;
+    if (e.target && e.target.closest && e.target.closest('.jobsync-flow-modal')) return;
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+    clearTimeout(triggerTimer);
+    triggerRegisterForm();
+  }
+  document.addEventListener('click', interactionTrigger, { capture:true, once:true });
+  document.addEventListener('touchstart', interactionTrigger, { capture:true, once:true, passive:false });
+  document.addEventListener('keydown', interactionTrigger, { capture:true, once:true });
+
+  function prefillForm(){
+    const name = localStorage.getItem('jobsync_apply_fullname') || localStorage.getItem('nhire_apply_fullname') || '';
+    const phone = localStorage.getItem('jobsync_apply_phone') || localStorage.getItem('nhire_apply_phone') || '';
+    const email = localStorage.getItem('jobsync_apply_email') || localStorage.getItem('nhire_apply_email') || '';
+    if ($('#jobsyncFullName')) $('#jobsyncFullName').value = name;
+    if ($('#jobsyncPhone')) $('#jobsyncPhone').value = phone;
+    if ($('#jobsyncEmail')) $('#jobsyncEmail').value = email;
+  }
+  prefillForm();
+
+  function initialsFromName(name){
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return 'JS';
+    return parts.slice(0, 2).map(p => p[0] || '').join('').toUpperCase();
+  }
+  function firstNameFromName(name){
+    return String(name || 'User').trim().split(/\s+/)[0] || 'User';
+  }
+
+  function updateRegisteredNavigation(){
+    const dashboardSvg = '<svg class="dashboard-icon" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3"></rect><path d="M8 9h8M8 13h4M16 13h.01M16 17h.01M12 17h.01M8 17h.01"></path></svg><span>Dashboard</span>';
+    const workSpaceSvg = '<svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="13" rx="2.5"></rect><path d="M8 21h8M12 18v3M8 10h8M8 14h5"></path></svg><span>Work Space</span>';
+    const withdrawalSvg = '<svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 7.5h15.5A2.5 2.5 0 0 1 22 10v7a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 17V6.8A2.8 2.8 0 0 1 4.8 4H18"></path><path d="M17 12h5v4h-5a2 2 0 0 1 0-4Z"></path><path d="M7 9h7"></path></svg><span>Withdrawal</span>';
+    const bottomItems = document.querySelectorAll('.bottom-nav a');
+    const bottomActive = bottomItems[0];
+    if (bottomActive && !bottomActive.dataset.dashboardReady) {
+      bottomActive.innerHTML = dashboardSvg;
+      bottomActive.setAttribute('aria-label', 'Dashboard');
+      bottomActive.dataset.dashboardReady = 'true';
+    }
+    if (bottomItems[2]) {
+      bottomItems[2].innerHTML = workSpaceSvg;
+      bottomItems[2].setAttribute('aria-label', 'Work Space');
+      bottomItems[2].dataset.dashboardLabel = 'workspace';
+    }
+    if (bottomItems[3]) {
+      bottomItems[3].innerHTML = withdrawalSvg;
+      bottomItems[3].setAttribute('aria-label', 'Withdrawal');
+      bottomItems[3].dataset.dashboardLabel = 'withdrawal';
+    }
+    const desktopActive = document.querySelector('.desktop-nav a.active');
+    if (desktopActive) desktopActive.textContent = 'Dashboard';
+    const mobileActive = document.querySelector('.mobile-menu a.active');
+    if (mobileActive) mobileActive.textContent = 'Dashboard';
+  }
+
+  function updateHomeNavigation(){
+    const homeSvg = '<svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3.5 10.6 12 3l8.5 7.6V21h-6v-6h-5v6h-6V10.6Z"></path></svg><span>Home</span>';
+    const applicationsSvg = '<svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linejoin="round" viewBox="0 0 24 24"><rect height="17" rx="2" width="14" x="5" y="3.5"></rect><path d="M9 9h6M9 13h6"></path></svg><span>Applications</span>';
+    const savedSvg = '<svg aria-hidden="true" fill="none" stroke="currentColor" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6 4.8A2.8 2.8 0 0 1 8.8 2h6.4A2.8 2.8 0 0 1 18 4.8V22l-6-3.6L6 22V4.8Z"></path></svg><span>Saved</span>';
+    const bottomItems = document.querySelectorAll('.bottom-nav a');
+    const bottomActive = bottomItems[0];
+    if (bottomActive) {
+      bottomActive.innerHTML = homeSvg;
+      bottomActive.setAttribute('aria-label', 'Home');
+      delete bottomActive.dataset.dashboardReady;
+    }
+    if (bottomItems[2]) {
+      bottomItems[2].innerHTML = applicationsSvg;
+      bottomItems[2].setAttribute('aria-label', 'Applications');
+      delete bottomItems[2].dataset.dashboardLabel;
+    }
+    if (bottomItems[3]) {
+      bottomItems[3].innerHTML = savedSvg;
+      bottomItems[3].setAttribute('aria-label', 'Saved');
+      delete bottomItems[3].dataset.dashboardLabel;
+    }
+    const desktopActive = document.querySelector('.desktop-nav a.active');
+    if (desktopActive) desktopActive.textContent = 'Home';
+    const mobileActive = document.querySelector('.mobile-menu a.active');
+    if (mobileActive) mobileActive.textContent = 'Home';
+  }
+
+  function resetToHomeScreen(){
+    document.body.classList.remove('jobsync-registered');
+    updateHomeNavigation();
+    formTriggered = false;
+    prefillForm();
+  }
+
+  // If a mobile browser restores the page from cache after the user returns,
+  // reset the visual state to Home while keeping saved input values.
+  window.addEventListener('pageshow', function(event){
+    if (event.persisted) resetToHomeScreen();
+  });
+
+
+  const JOBSYNC_PERSON_IMAGE = 'image.png';
+
+  function applyRegisteredDashboard(name){
+    const displayName = String(name || localStorage.getItem('jobsync_apply_fullname') || localStorage.getItem('nhire_apply_fullname') || 'User').trim() || 'User';
+    document.body.classList.add('jobsync-registered');
+    const nameEl = document.getElementById('jobsyncRegisteredName');
+    const avatarEl = document.getElementById('jobsyncRegisteredAvatar');
+    const personEl = document.getElementById('jobsyncRegisteredPerson');
+    const heroPerson = document.querySelector('.hero-art img');
+    if (nameEl) nameEl.textContent = displayName;
+    if (avatarEl) avatarEl.textContent = initialsFromName(displayName);
+    if (personEl) personEl.setAttribute('src', JOBSYNC_PERSON_IMAGE);
+    updateRegisteredNavigation();
+  }
+  function hasRegisteredProfile(){
+    return document.body.classList.contains('jobsync-registered');
+  }
+  // Do not auto-open the registered dashboard on reload/return.
+  // The saved details remain in localStorage and are used only to prefill the form.
+
+
+  $('#jobsyncRegisterForm')?.addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = $('#jobsyncFullName').value.trim();
+    const phone = $('#jobsyncPhone').value.trim();
+    const email = $('#jobsyncEmail').value.trim();
+    if (!name || !phone || !email) return;
+    localStorage.setItem('jobsync_apply_fullname', name);
+    localStorage.setItem('jobsync_apply_phone', phone);
+    localStorage.setItem('jobsync_apply_email', email);
+    // Keep the same storage keys used by index(75).html so the payment proof flow remains compatible.
+    localStorage.setItem('nhire_apply_fullname', name);
+    localStorage.setItem('nhire_apply_phone', phone);
+    localStorage.setItem('nhire_apply_email', email);
+    localStorage.removeItem('jobsync_registered_v1');
+    applyRegisteredDashboard(name);
+    closeModal('jobsyncRegisterModal');
+    clearTimeout(plansAutoTimer);
+    plansAutoTimer = setTimeout(function(){
+      if (document.body.classList.contains('jobsync-registered') && !document.querySelector('.jobsync-flow-modal.is-open')) {
+        openModal('jobsyncPlansModal');
+      }
+    }, 5000);
+  });
+
+  document.addEventListener('click', function(e){
+    const closeBtn = e.target.closest('[data-close-modal]');
+    if (closeBtn) closeModal(closeBtn.getAttribute('data-close-modal'));
+  });
+  $$('.jobsync-flow-modal').forEach(modal => modal.addEventListener('click', function(e){ if(e.target === modal && modal.id !== 'jobsyncRegisterModal') closeModal(modal.id); }));
+
+  function planDetailsMarkup(plan){
+    const isPro = plan === 'Pro';
+    const points = isPro ? [
+      'Unlimited daily work access', 'Priority access to high-paying jobs', 'Personalized job recommendations', 'Private premium community access', 'Early access to new opportunities'
+    ] : [
+      '3 hours daily work access', 'Explore 18 remote job categories', 'Access global and local job opportunities', 'Professional CV review', 'Subscription is valid for 3 months'
+    ];
+    return `
+      <div style="max-width:480px;margin:0 auto;">
+        ${isPro ? '<div style="text-align:center;margin-bottom:12px;"><span class="jobsync-chip">MOST POPULAR</span></div>' : ''}
+        <h3 style="font-size:26px;line-height:1.12;text-align:center;font-weight:900;letter-spacing:-.7px;">RemoTasks ${PLAN_LABEL[plan]}</h3>
+        <div style="text-align:center;margin-top:10px;color:var(--teal);font-size:28px;font-weight:900;"><s style="font-size:15px;color:#8b95a1;margin-right:7px;">${PLAN_OLD[plan]}</s>${PLAN_AMOUNT[plan]}</div><div style="text-align:center;margin-top:7px;"><span class="jobsync-naira-equivalent"><small>Naira:</small> ${PLAN_NAIRA[plan]}</span></div>
+        <ul class="jobsync-plan-list">${points.map(p => `<li>${p}</li>`).join('')}</ul>
+        <div style="margin-top:18px;padding:15px;border-radius:18px;background:#fff4de;color:#54400c;font-size:14px;line-height:1.55;font-weight:750;text-align:center;">Complete your payment to activate your RemoTasks access and continue.</div>
+        <div class="jobsync-actions-row"><button id="jobsyncGetVerified" class="jobsync-primary-btn" type="button">Get Verified Now</button><button id="jobsyncBackToPlans" class="jobsync-secondary-btn" type="button">Back</button></div>
+      </div>`;
+  }
+  function restorePlanGrid(){
+    $('#jobsyncPlansContent').innerHTML = `
+      <div class="jobsync-plan-grid">
+        <button class="jobsync-plan-card" type="button" data-plan="Basic"><div class="jobsync-plan-kicker">RemoTasks</div><div class="jobsync-plan-title">Starter - Basic Access</div><div class="jobsync-price"><s>$22</s>$5.99</div><div class="jobsync-naira-equivalent"><small>Naira:</small> ₦8,220</div><ul class="jobsync-plan-list"><li>3 hours daily job access</li><li>Explore remote job categories</li><li>CV review and starter support</li></ul><span class="jobsync-select-plan-btn">Select Basic Plan</span></button>
+        <button class="jobsync-plan-card" type="button" data-plan="Pro"><div class="jobsync-plan-kicker">RemoTasks</div><div class="jobsync-plan-title">Pro - Premium Access</div><span class="jobsync-chip">MOST POPULAR</span><div class="jobsync-price"><s>$57</s>$9.99</div><div class="jobsync-naira-equivalent"><small>Naira:</small> ₦13,709</div><ul class="jobsync-plan-list"><li>Priority access to better jobs</li><li>Premium recommendations</li><li>Private support and training</li></ul><span class="jobsync-select-plan-btn">Select Pro Plan</span></button>
+      </div>`;
+  }
+
+
+  function openAccessPlanForActivation(){
+    if (!document.body.classList.contains('jobsync-registered')) return;
+    clearTimeout(plansAutoTimer);
+    restorePlanGrid();
+    openModal('jobsyncPlansModal');
+  }
+
+  // In the dashboard, tapping the indicated areas opens the Access Plan popup.
+  document.addEventListener('click', function(e){
+    if (!document.body.classList.contains('jobsync-registered')) return;
+    const trigger = e.target.closest('.registered-top-row, .registered-earn-card, .working-btn, .registered-hours, .registered-list-btn, .bottom-nav a[data-dashboard-label="workspace"], .bottom-nav a[data-dashboard-label="withdrawal"], .job-apply-btn-sync');
+    if (!trigger) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openAccessPlanForActivation();
+  }, true);
+
+  document.addEventListener('click', function(e){
+    const planBtn = e.target.closest('[data-plan]');
+    if (!planBtn || !planBtn.closest('#jobsyncPlansModal')) return;
+    selectedPlan = planBtn.getAttribute('data-plan') || 'Basic';
+    localStorage.setItem('jobsync_selected_plan', selectedPlan);
+    localStorage.setItem('nhire_selected_plan_v1', selectedPlan);
+    localStorage.setItem('nhire_selected_amount_v1', PLAN_AMOUNT[selectedPlan]);
+    localStorage.setItem('nhire_selected_amount_usd_v1', selectedPlan === 'Pro' ? '9.99' : '5.99');
+    localStorage.setItem('nhire_selected_paystack_link_v1', PAYSTACK_LINKS[selectedPlan]);
+    $('#jobsyncPlansContent').innerHTML = planDetailsMarkup(selectedPlan);
+  });
+  document.addEventListener('click', function(e){
+    if (e.target.closest('#jobsyncBackToPlans')) restorePlanGrid();
+    if (e.target.closest('#jobsyncGetVerified')) { closeModal('jobsyncPlansModal'); openModal('jobsyncPaymentMethodModal'); }
+  });
+
+  function setPaymentDetails(cfg){
+    $('#jobsyncAcctNoLabel').textContent = cfg.acctNoLabel;
+    $('#jobsyncAcctNameLabel').textContent = cfg.acctNameLabel;
+    $('#jobsyncBankLabel').textContent = cfg.bankLabel;
+    $('#jobsyncAcctNo').textContent = cfg.acctNo;
+    $('#jobsyncAcctName').textContent = cfg.acctName;
+    $('#jobsyncBank').textContent = cfg.bank;
+    $('#jobsyncAmount').textContent = PLAN_AMOUNT[selectedPlan] || '$0';
+  }
+  function openPaymentForMethod(method){
+    selectedMethod = method;
+    localStorage.setItem('jobsync_selected_payment_method', method);
+    localStorage.setItem('nhire_selected_payment_method_v1', method);
+    const paystackWrap = $('#jobsyncPaystackWrap');
+    const manualWrap = $('#jobsyncManualPaymentWrap');
+    const frame = $('#jobsyncPaystackFrame');
+    const openPaystack = $('#jobsyncOpenPaystack');
+    $('#jobsyncPayName').textContent = localStorage.getItem('jobsync_apply_fullname') || localStorage.getItem('nhire_apply_fullname') || 'there';
+    $('#jobsyncSubmitProof').textContent = method === 'bank' ? 'Submit Payment Proof' : 'Confirm Payment';
+    if (method === 'bank') {
+      const link = PAYSTACK_LINKS[selectedPlan] || PAYSTACK_LINKS.Basic;
+      const cfg = Object.assign({}, PAYMENT_METHODS.bank, { acctName: selectedPlan === 'Pro' ? 'Premium Access' : 'Basic Access', bank: link });
+      setPaymentDetails(cfg);
+      manualWrap.style.display = 'none';
+      paystackWrap.classList.add('is-visible');
+      frame.src = link;
+      openPaystack.href = link;
+      localStorage.setItem('nhire_selected_paystack_link_v1', link);
+    } else {
+      setPaymentDetails(PAYMENT_METHODS[method] || PAYMENT_METHODS.usdt);
+      manualWrap.style.display = 'grid';
+      paystackWrap.classList.remove('is-visible');
+      frame.src = 'about:blank';
+    }
+    startCountdown();
+    closeModal('jobsyncPaymentMethodModal');
+    openModal('jobsyncPaymentModal');
+  }
+
+  document.addEventListener('click', function(e){
+    const method = e.target.closest('[data-pay-method]');
+    if (!method) return;
+    const value = method.getAttribute('data-pay-method');
+    if (value === 'paypal') { closeModal('jobsyncPaymentMethodModal'); openModal('jobsyncPaypalUnavailableModal'); return; }
+    openPaymentForMethod(value);
+  });
+  $('#jobsyncBackToPaymentMethods')?.addEventListener('click', function(){ closeModal('jobsyncPaypalUnavailableModal'); openModal('jobsyncPaymentMethodModal'); });
+  $('#jobsyncChangeMethod')?.addEventListener('click', function(){ closeModal('jobsyncPaymentModal'); openModal('jobsyncPaymentMethodModal'); });
+
+  function startCountdown(){
+    const timer = $('#jobsyncCountdown');
+    if (!timer) return;
+    let remaining = 3600;
+    clearInterval(countdownTimer);
+    function tick(){
+      const h = String(Math.floor(remaining/3600)).padStart(2,'0');
+      const m = String(Math.floor((remaining%3600)/60)).padStart(2,'0');
+      const s = String(remaining%60).padStart(2,'0');
+      timer.textContent = h + ':' + m + ':' + s;
+      if (remaining <= 0) { clearInterval(countdownTimer); timer.textContent = 'Expired'; return; }
+      remaining--;
+    }
+    tick(); countdownTimer = setInterval(tick, 1000);
+  }
+
+  document.addEventListener('click', async function(e){
+    const copyBtn = e.target.closest('[data-copy-target]');
+    if (!copyBtn) return;
+    const target = document.querySelector(copyBtn.getAttribute('data-copy-target'));
+    const text = target ? target.textContent.trim() : '';
+    if (!text) return;
+    try { await navigator.clipboard.writeText(text); }
+    catch(_) { const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+    const old = copyBtn.textContent; copyBtn.textContent = 'Copied!'; setTimeout(()=>copyBtn.textContent=old, 1100);
+  });
+
+  function selectedJob(){
+    const savedTitle = localStorage.getItem('jobsync_selected_job_title');
+    if (savedTitle) return savedTitle;
+    const title = document.querySelector('.job-card .job-info h3');
+    return title ? title.textContent.trim() : 'UI/UX Designer';
+  }
+  function buildProofMessage(channel){
+    const name = localStorage.getItem('jobsync_apply_fullname') || localStorage.getItem('nhire_apply_fullname') || 'there';
+    const phone = localStorage.getItem('jobsync_apply_phone') || localStorage.getItem('nhire_apply_phone') || '';
+    const email = localStorage.getItem('jobsync_apply_email') || localStorage.getItem('nhire_apply_email') || '';
+    const methodLabel = selectedMethod === 'bank' ? 'Paystack popup checkout / Bank Transfer' : (selectedMethod === 'usdt' ? 'USDT Crypto Payment' : 'PayPal');
+    const link = PAYSTACK_LINKS[selectedPlan] || PAYSTACK_LINKS.Basic;
+    const rows = [
+      'Hello Admin, please confirm my payment.', '',
+      'Name: ' + name,
+      'Phone: ' + phone,
+      'Email: ' + email,
+      'Selected Plan: RemoTasks ' + (PLAN_LABEL[selectedPlan] || selectedPlan),
+      'Selected Job: ' + selectedJob(),
+      'Amount Paid: ' + (PLAN_AMOUNT[selectedPlan] || '$0'),
+      'Payment Method: ' + methodLabel
+    ];
+    if (selectedMethod === 'bank') rows.push('Paystack Checkout Link: ' + link);
+    rows.push('', 'Payment Details Shown to Me:');
+    rows.push($('#jobsyncAcctNoLabel').textContent + ': ' + $('#jobsyncAcctNo').textContent);
+    rows.push($('#jobsyncAcctNameLabel').textContent + ': ' + $('#jobsyncAcctName').textContent);
+    rows.push($('#jobsyncBankLabel').textContent + ': ' + $('#jobsyncBank').textContent);
+    rows.push('', 'Submitted At: ' + new Date().toLocaleString());
+    rows.push('', 'I will upload my proof of payment now as a picture, screenshot, file, or PDF.');
+    localStorage.setItem('jobsync_last_payment_proof_message', rows.join('\n'));
+    localStorage.setItem('nhire_last_payment_proof_message_v1', rows.join('\n'));
+    return rows.join('\n');
+  }
+
+  document.addEventListener('click', function(e){
+    const applyBtn = e.target.closest('.job-apply-btn-sync');
+    if (!applyBtn) return;
+    e.preventDefault();
+    const card = applyBtn.closest('.job-card');
+    const title = (card && card.querySelector('.job-info h3') ? card.querySelector('.job-info h3').textContent.trim() : applyBtn.dataset.jobTitle || 'Selected Job');
+    const company = applyBtn.dataset.company || '';
+    localStorage.setItem('jobsync_selected_job_title', title);
+    localStorage.setItem('jobsync_selected_job_company', company);
+    clearTimeout(plansAutoTimer);
+    closeAllModals();
+    openModal('jobsyncPlansModal');
+  });
+
+    $('#jobsyncSubmitProof')?.addEventListener('click', function(){ openModal('jobsyncSubmitOptionsModal'); });
+  document.addEventListener('click', function(e){
+    const submit = e.target.closest('[data-submit-channel]');
+    if (!submit) return;
+    const channel = submit.getAttribute('data-submit-channel');
+    const msg = buildProofMessage(channel);
+    if (channel === 'telegram') {
+      try { navigator.clipboard && navigator.clipboard.writeText(msg); } catch(_) {}
+      window.location.href = 'https://t.me/nhireai?text=' + encodeURIComponent(msg);
+    } else if (channel === 'email') {
+      window.location.href = 'mailto:nhirejobs.inbox@gmail.com?subject=' + encodeURIComponent('Nhire Payment Proof Submission') + '&body=' + encodeURIComponent(msg);
+    }
+    closeModal('jobsyncSubmitOptionsModal');
+    openModal('jobsyncProofSuccessModal');
+  });
+})();
+</script>
+
+</body>
+</html>
